@@ -1,0 +1,97 @@
+/* 
+
+    Name: Isaac Kwok
+    Admin No: p2317665
+    Class: DIT1B09
+	
+*/
+
+
+/*=============== GOOGLE FONTS ===============*/
+@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@700&display=swap");
+/*=============== Font for Item Names ===============*/
+@import url('https://fonts.cdnfonts.com/css/black-ops-one');
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/*=============== Font for Titles ===============*/
+@import url('https://fonts.cdnfonts.com/css/black-side');
+/*=============== Font for Subsequent Buttons ===============*/
+@import url('https://fonts.cdnfonts.com/css/adlam-display');
+/*=============== Font for Move Names ===============*/
+@import url('https://fonts.cdnfonts.com/css/bluesky-2');
+/*=============== Font for Combat Turn Outcome ===============*/
+@import url('https://fonts.cdnfonts.com/css/adlam-display');
+/*=============== Font for Game Name ===============*/
+@import url('https://fonts.cdnfonts.com/css/skwirl');
+
+
+/* Styling for user count display */
+.userCount-container {
+    background-color: #fefae0; 
+    border-radius: 15px;
+    padding: 20px;
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    font-family: 'Adlam Display', sans-serif;
+    color: #d4a373;
+}
+
+.userCount-number {
+    font-family: 'Black Ops One', sans-serif;
+    color: #d4a373; 
+}
+
+.container {
+    width: 70% !important;
+}
+
+.btn-outline-brown {
+    border-color: #d4a373 !important;
+    color: #d4a373 !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-brown:hover {
+    background-color: #d4a373 !important;
+    color: white !important;
+}
+
+.brand{
+    color: #ccd5ae;
+    color: #e9edc9;
+    color: #fefae0;
+    color: #faedcd;
+    color: #d4a373;
+}
+
+.reason-text {
+    background-color: #f7ebe1; /* Light brown background */
+    color: #d4a373;           /* Brown text color */
+    font-weight: 600;         /* Medium-bold font */
+    border-radius: 8px;       /* Rounded corners */
+    padding: 8px 12px;        /* Add padding for a better look */
+    margin-top: 10px;         /* Add spacing above the reason */
+    display: inline-block;    /* Make it look like a label */
+    font-size: 0.9rem;        /* Adjust font size if necessary */
+  }
+
+/* Default tag button styling */
+.btn-outline-secondary {
+    transition: all 0.3s ease;
+}
+
+/* Styling for selected tag button */
+.btn-outline-secondary.selected {
+    background-color: #007bff;  /* Blue background when selected */
+    color: white;  /* White text when selected */
+}
+
+/* Optional: Change text color on hover */
+.btn-outline-secondary:hover {
+    background-color: #f0f0f0;
+    color: #007bff;
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Module for Quiz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link href="styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <!-- Navbar will be injected here -->
+    <div id="navbar-container"></div>
+
+    <div class="container-fluid breadcrumb-container py-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0" id="breadcrumb">
+                <li class="breadcrumb-item"><a href="/quiz/chooseSchoolForQuiz.html">Choose School</a></li>
+                <li class="breadcrumb-item active" id="current-school" aria-current="page"></li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Search bar -->
+    <div class="container my-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <input
+                    type="text"
+                    id="search-bar"
+                    class="form-control"
+                    placeholder="Search for a module by name..."
+                    aria-label="Search modules"
+                />
+            </div>
+        </div>
+    </div>
+
+    <!-- Modules displayed in cards -->
+    <div class="container my-5 py-5">
+        <h2 class="text-center h1 title col-12">Select a Module for Quizzes / Flashcards</h2>
+        <div class="row justify-content-center" id="modules">
+            <!-- Cards for each module will be inserted here -->
+        </div>
+    </div>
+
+    <script src="../auth.js"></script>
+    <script src="chooseModuleForQuiz.js"></script>
+</body>
+
+</html>

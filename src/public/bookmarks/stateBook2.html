@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookmarks</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    /* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+.placeholder {
+  text-align: center;
+  font-size: 1.2rem;
+  color: black; /* Soft gray for placeholder text */
+  padding: 1rem;
+  border: 2px dashed #deb183; /* Dashed border for emphasis */
+  border-radius: 8px;
+  background-color: #fffbe6 !important; /* Light golden background */
+  margin: 1rem 0;
+}
+
+
+body {
+  background-color: #f9f9f9; /* Soft light background for body */
+  color: #333; /* Neutral dark text for readability */
+  line-height: 1.6;
+}
+
+.header {
+  text-align: center;
+  padding: 2rem 1rem;
+  background-color: #deb183; /* Main accent color */
+  color: white; /* White text for contrast */
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: #212529; /* Darker tone for main heading */
+}
+
+.header p {
+  font-size: 1.2rem;
+  color: #6c757d; /* Softer tone for subheading */
+}
+
+.main-container {
+  padding: 2rem 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.bookmark-section {
+  margin-bottom: 2rem;
+}
+
+.bookmark-section h2 {
+  font-size: 1.8rem;
+  color:#664404; /* Softer, more muted golden tone for subheadings */
+
+}
+
+.bookmark-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+}
+
+.bookmark-card {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease;
+}
+
+.bookmark-card:hover {
+  transform: translateY(-5px);
+}
+
+.bookmark-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.bookmark-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #212529; /* Dark gray for more emphasis on titles */
+}
+
+.bookmark-card p {
+  font-size: 0.9rem;
+  color: #6c757d; /* Soft gray for descriptions */
+  margin-bottom: 1rem;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-actions button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.card-actions button:hover {
+  opacity: 0.9;
+}
+
+.card-actions .reading-btn {
+  background-color: #ffa41b; /* Lighter, paler yellow for secondary actions */
+  color: white;
+}
+
+.card-actions .finished-btn {
+  background-color: #2596be; /* Intense green for success actions */
+  color: white;
+}
+
+.card-actions .reset-btn {
+  background-color: #dc3545; /* Intense red for reset actions */
+  color: white;
+}
+
+.start-reading-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  color: #fff;
+  background-color: #deb183; /* Primary golden tone */
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.start-reading-btn:hover {
+  background-color: #cfa372; /* Darker, more intense golden tone */
+  transform: scale(1.05);
+}
+
+/* Progress bar styles */
+.progress-container {
+  background-color: #e6e6e6; /* Light gray for progress container */
+  border-radius: 10px;
+  height: 8px;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-bar {
+  background-color: black !important; /* Matching golden tone for progress fill */
+  border-radius: 10px;
+  height: 100%;
+  transition: width 0.3s ease;
+  
+}
+
+/* Icon Section */
+.icon-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  background-color: #f8f9fa; /* Light gray background */
+  border: 1px solid #e0c37b; /* Lighter golden border for subtlety */
+  border-radius: 5px;
+}
+
+.icon-container i {
+  font-size: 1.8rem;
+  color: #deb183; /* Golden icon for emphasis */
+}
+
+/* Adjust the tone of the hover effects for better contrast */
+.icon-container:hover {
+  background-color: #deb183; /* Hover with matching golden tone */
+}
+
+.icon-container:hover i {
+  color: white; /* Icon turns white on hover */
+}
+
+
+  </style>
+</head>
+<body>
+
+   <!-- Navbar will be injected here -->
+   <div id="navbar-container"></div> 
+
+  <main class="main-container">
+    <!-- Unread Section -->
+    <section class="bookmark-section">
+      <div class="icon-section">
+        <div class="icon-container">
+          <i class="bi bi-journal-bookmark-fill"></i>
+        </div>
+        <h2>Unread</h2>
+      </div>
+      <div id="unread" class="bookmark-grid">
+        <!-- Cards will be dynamically inserted here -->
+      </div>
+    </section>
+
+    <!-- Reading Section -->
+    <section class="bookmark-section">
+      <div class="icon-section">
+        <div class="icon-container">
+          <i class="bi bi-clock-history"></i>
+        </div>
+        <h2>Pick up where you left off</h2>
+      </div>
+      <div id="reading" class="bookmark-grid">
+        <!-- Cards will be dynamically inserted here -->
+      </div>
+    </section>
+
+    <!-- Finished Section -->
+    <section class="bookmark-section">
+      <div class="icon-section">
+        <div class="icon-container">
+          <i class="bi bi-check2-circle"></i>
+        </div>
+        <h2>Finished</h2>
+      </div>
+      <div id="finished" class="bookmark-grid">
+        <!-- Cards will be dynamically inserted here -->
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Helper function to fetch bookmarks by status
+    async function fetchBookmarks() {
+      try {
+        const response = await fetch('/bookmarks', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Assuming JWT token is stored here
+          },
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch bookmarks.');
+
+        const bookmarks = await response.json();
+
+        // Categorize bookmarks
+        const categorized = {
+          UNREAD: [],
+          READING: [],
+          FINISHED: [],
+        };
+
+        bookmarks.forEach((bookmark) => {
+          categorized[bookmark.status].push(bookmark);
+        });
+
+        renderBookmarks(categorized);
+      } catch (error) {
+        console.error('Error fetching bookmarks:', error);
+      }
+    }
+
+    // // Helper function to render bookmarks with progress
+    // function renderBookmarks(categorizedBookmarks) {
+    //   const sections = {
+    //     UNREAD: document.getElementById('unread'),
+    //     READING: document.getElementById('reading'),
+    //     FINISHED: document.getElementById('finished'),
+    //   };
+
+    //   Object.keys(sections).forEach((status) => {
+    //     const section = sections[status];
+    //     section.innerHTML = ''; // Clear existing content
+
+    //     categorizedBookmarks[status].forEach((bookmark) => {
+    //       const card = document.createElement('div');
+    //       card.className = 'bookmark-card';
+
+    //       // Logic for displaying progress bar
+    //       const progressBar = `<div class="progress-bar" style="width: ${bookmark.progress}%;">${bookmark.progress}%</div>`;
+
+    //       // Logic for displaying buttons based on the status
+    //       let actions = '';
+    //       if (status === 'UNREAD') {
+    //         actions = `
+    //           <a href="resourcedetails2.html?id=${bookmark.resource.id}&bookmarkId=${bookmark.id}" class="start-reading-btn">Start Reading</a>
+    //         `;
+    //       } else if (status === 'READING') {
+    //         actions = `
+    //           <button class="finished-btn" data-id="${bookmark.id}">
+    //             Finished
+    //           </button>
+    //         `;
+    //       } else if (status === 'FINISHED') {
+    //         actions = `
+    //           <button class="reset-btn" data-id="${bookmark.id}">
+    //             Unread
+    //           </button>
+    //         `;
+    //       }
+
+    //       card.innerHTML = `
+    //         <h3>${bookmark.resource.title}</h3>
+    //         <p>${bookmark.resource.description || 'No description available.'}</p>
+    //         ${progressBar}
+    //         <div class="card-actions">
+    //           ${actions}
+    //         </div>
+    //       `;
+
+    //       section.appendChild(card);
+    //     });
+    //   });
+
+    //   addEventListeners();
+    // }
+
+    function renderBookmarks(categorizedBookmarks) {
+  const sections = {
+    UNREAD: document.getElementById('unread'),
+    READING: document.getElementById('reading'),
+    FINISHED: document.getElementById('finished'),
+  };
+
+  Object.keys(sections).forEach((status) => {
+    const section = sections[status];
+    section.innerHTML = ''; // Clear existing content
+
+    if (categorizedBookmarks[status].length === 0) {
+      // Add a placeholder if no bookmarks exist for this category
+      const placeholder = document.createElement('div');
+      placeholder.className = 'placeholder';
+      placeholder.innerHTML = `<p>No books in this category yet.</p>`;
+      section.appendChild(placeholder);
+    } else {
+      // Render the bookmarks for this category
+      categorizedBookmarks[status].forEach((bookmark) => {
+        const card = document.createElement('div');
+        card.className = 'bookmark-card';
+
+        // Logic for displaying progress bar
+        const progressBar = `
+          <div class="progress-container">
+            <div class="progress-bar" style="width: ${bookmark.progress}%;"></div>
+          </div>
+        `;
+
+        // Logic for displaying buttons based on the status
+        let actions = '';
+        if (status === 'UNREAD') {
+          actions = `
+        
+              <button class="read-and-update start-reading-btn" data-id="${bookmark.id}">Read</button>
+            `;
+        } else if (status === 'READING') {
+          actions = `
+            <a href="bookmarks/resourcedetails2.html?id=${bookmark.resource.id}&bookmarkId=${bookmark.id}" class="start-reading-btn">Continue</a>
+            <button class="finished-btn" data-id="${bookmark.id}">Finished</button>
+          `;
+        } else if (status === 'FINISHED') {
+          actions = `
+            <button class="reset-btn" data-id="${bookmark.id}">Unread</button>
+          `;
+        }
+
+        // Create the card's inner HTML
+        card.innerHTML = `
+          <h3>${bookmark.resource.title}</h3>
+          <p>${bookmark.resource.description || 'No description available.'}</p>
+          ${progressBar}
+          <div class="card-actions">
+            ${actions}
+          </div>
+        `;
+
+        section.appendChild(card);
+      });
+    }
+  });
+
+  addEventListeners();
+}
+
+// Helper function to update bookmark status and progress
+async function updateBookmarkStatus(id, status) {
+  let progress = null; // Default to null; only set if status is UNREAD or FINISHED
+
+  // Set progress based on the status
+  if (status === 'FINISHED') {
+    progress = 100;
+  } else if (status === 'UNREAD') {
+    progress = 0;
+  }
+
+  try {
+    // Update status first
+    const statusResponse = await fetch(`/bookmarks/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    if (!statusResponse.ok) throw new Error('Failed to update bookmark status.');
+
+    // Update progress only if the status implies a progress change
+    if (progress !== null) {
+      const progressResponse = await fetch(`/bookmarks/${id}/progress`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ progress }),
+      });
+
+      if (!progressResponse.ok) throw new Error('Failed to update bookmark progress.');
+    }
+
+    await fetchBookmarks(); // Refresh bookmarks
+  } catch (error) {
+    console.error('Error updating bookmark status or progress:', error);
+  }
+}
+    // // Helper function to update bookmark status and progress
+    // async function updateBookmarkStatus(id, status) {
+    //   let progress = 0;  // Default progress value
+
+    //   // Set progress based on the status
+    //   if (status === 'FINISHED') {
+    //     progress = 100;
+    //   } else if (status === 'UNREAD') {
+    //     progress = 0;
+    //   }
+
+    //   try {
+    //     const response = await fetch(`/bookmarks/${id}/status`, {
+    //       method: 'PATCH',
+    //       headers: {
+    //         'Content-Type': 'application/json',
+    //         Authorization: `Bearer ${localStorage.getItem('token')}`,
+    //       },
+    //       body: JSON.stringify({ status, progress }),
+    //     });
+
+    //     if (!response.ok) throw new Error('Failed to update bookmark status.');
+
+    //     await fetchBookmarks(); // Refresh bookmarks
+    //   } catch (error) {
+    //     console.error('Error updating bookmark status:', error);
+    //   }
+    // }
+
+    // // Helper function to delete a bookmark
+    // async function deleteBookmark(id) {
+    //   try {
+    //     const response = await fetch(`/bookmarks/${id}`, {
+    //       method: 'DELETE',
+    //       headers: {
+    //         Authorization: `Bearer ${localStorage.getItem('token')}`,
+    //       },
+    //     });
+
+    //     if (!response.ok) throw new Error('Failed to delete bookmark.');
+
+    //     await fetchBookmarks(); // Refresh bookmarks
+    //   } catch (error) {
+    //     console.error('Error deleting bookmark:', error);
+    //   }
+    // }
+
+    // Add event listeners to dynamically generated buttons
+
+
+
+    function addEventListeners() {
+      document.querySelectorAll('.read-and-update').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          updateBookmarkStatus(id, 'READING');
+        });
+      });
+
+      document.querySelectorAll('.finished-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          updateBookmarkStatus(id, 'FINISHED');
+        });
+      });
+
+      document.querySelectorAll('.reset-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          updateBookmarkStatus(id, 'UNREAD');
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          deleteBookmark(id);
+        });
+      });
+    }
+
+
+    // Function to load the navbar
+    window.addEventListener('DOMContentLoaded', function () {
+      // Load the navbar
+      fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+
+      // Fetch bookmarks when the page loads
+      fetchBookmarks();
+    });
+
+  
+  </script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Your Study Groups</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .chat-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .chat-logo {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+
+        #messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            background-color: white;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        #messages li {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 75%;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        #messages li.user-message {
+            background-color: #d1e7dd;
+            text-align: right;
+            margin-left: auto;
+        }
+
+        #messages li.other-message {
+            background-color: #f8d7da;
+            text-align: left;
+            margin-right: auto;
+        }
+
+        #messages li.user-poll {
+        background-color: #d1e7dd;  
+        text-align: right;
+        margin-left: auto;
+        }
+
+        #messages li.other-poll {
+        background-color: #f8d7da;  
+        text-align: left;
+        margin-right: auto;
+        }
+
+        #chat-form {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        #message {
+            flex-grow: 1;
+            margin-right: 10px;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .btn-primary {
+            background-color: #deb183 !important;
+            color: black;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .btn-custom {
+            background-color: #deb183 !important;
+            color: black;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .btn-poll {
+            margin-right: 20px;
+            background-color: #f2c9a1 !important;
+            color: black;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #f5dfb6;
+            padding: 10px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 8px;
+        }
+
+        .modal-dialog {
+            margin: auto;
+        }
+
+        .remove-option-btn {
+            background: none;
+            border: none;
+            color: red;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .remove-option-btn:hover {
+            color: darkred;
+        }
+
+        .poll-options {
+        list-style-type: none; /* Removes the dots */
+        padding: 0;
+        margin: 0;
+        }
+
+        /* Improve the look of each poll option */
+        .poll-option-label {
+        display: flex;
+        align-items: center;
+        background-color: #f8f9fa;  /* Light gray background */
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 10px; /* Add spacing between options */
+        cursor: pointer; /* Make it look clickable */
+        transition: background-color 0.3s ease;
+        width: 100%;
+        }
+
+        /* Style the radio buttons */
+        .poll-option-label input[type="radio"] {
+        margin-right: 12px;
+        transform: scale(1.2); /* Make radio buttons slightly larger */
+        }
+
+        /* Add hover effect */
+        .poll-option-label:hover {
+        background-color: #e9ecef; /* Slightly darker background on hover */
+        }
+
+        /* Style the text and votes inside options */
+        .poll-option-label span {
+        font-weight: bold;
+        margin-left: auto; /* Push vote count to the right */
+        color: #6c757d; /* Subtle gray color for votes */
+        }
+
+        /* Optional: Make selected option stand out */
+        .poll-option-label input[type="radio"]:checked + span {
+        color: #007bff; /* Highlight text when selected */
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="navbar-container" class="mb-3"></div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h4 id="group-name">Study Group Chat</h4>
+        </div>
+        <ul id="messages"></ul>
+        <form id="chat-form">
+            <input id="message" autocomplete="off" placeholder="Type a message..." class="form-control" />
+            <button type="button" class="btn btn-poll" id="pollBtn" onclick="openModal()">Poll</button>
+            <button type="submit" class="btn btn-custom" id="sendBtn">Send</button>
+        </form>
+        <div id="pollModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header mb-3">
+                    <h4>Create Poll</h4>
+                    <button class="close-btn" onclick="closeModal()">x</button>
+                </div>
+                <div class="container">
+                    <form id="poll-form">
+                        <label for="poll-question" class="mb-2">Question:</label>
+                        <input type="text" id="poll-question" class="form-control" required placeholder="Enter your question here"/><br><br>
+                        <p>Add your options below:</p>
+                        <div id="poll-options">
+                            <!-- Option 1 -->
+                            <div class="poll-option d-flex align-items-center mb-2">
+                                <label for="poll-option-1" class="me-2">Option 1:</label>
+                                <input type="text" class="form-control" required style="width: 200px;">
+                            </div>
+                
+                            <!-- Option 2 -->
+                            <div class="poll-option d-flex align-items-center mb-2">
+                                <label for="poll-option-2" class="me-2">Option 2:</label>
+                                <input type="text" class="form-control" required style="width: 200px;">
+                            </div>
+                        </div>
+                
+                        <!-- Button to add more options -->
+                        <button type="button" class="btn btn-secondary mt-2" id="add-option-btn">+ Add Option</button><br><br>
+                
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-poll" id="createPollBtn">Create Poll</button>
+                        </div>
+                    </form>
+                </div>                                               
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="../groupChat/groupChat.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+        });
+
+        function openModal() {
+            // const roomId = localStorage.getItem("roomId");  // Get roomId from localStorage
+            // fetchAvailableSlots(roomId, selectedDate);
+
+            // Show modal
+            const modal = document.getElementById('pollModal');
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('pollModal');
+            modal.style.display = 'none';
+        }
+
+        document.getElementById('pollModal').addEventListener('click', function (event) {
+            const modalContent = document.querySelector('.modal-content');
+            // if (!modalContent.contains(event.target)) {
+            //     closeModal(); // Close the modal if clicked outside the modal content
+            // }
+        });
+    </script>
+</body>
+
+</html>

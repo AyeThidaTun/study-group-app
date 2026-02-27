@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Task</title>
+    <style>
+      .member-card {
+          cursor: pointer; /* Make member cards clickable */
+      }
+      .member-card.selected { /* Style for selected members */
+          border: 2px solid blue; /* Or any other visual cue */
+      }
+  </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sour+Gummy:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+</head>
+<body>
+    <div id="navbar-container"></div>
+
+    <div class="container mt-5">
+        <h2>Assign Tasks to Group Members</h2>
+        
+        <!-- Group Selection -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h4 class="card-title">Your Study Groups</h4>
+      <div id="groupsContainer" class="row"></div>
+    </div>
+  </div>
+
+  <!-- Member Selection -->
+  <div class="card mb-4" id="memberSection" style="display: none;">
+    <div class="card-body">
+      <h4 class="card-title">Select Members</h4>
+      <div id="memberSelection" class="row"></div>
+      <button class="btn btn-secondary mt-3" onclick="resetForm()">
+        <i class="bi bi-arrow-counterclockwise"></i> Reset Selection
+      </button>
+    </div>
+  </div>
+
+  <!-- Task Form -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h4 class="card-title">Task Details</h4>
+      <form id="assignmentForm">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="title" class="form-label">Task Title</label>
+            <input type="text" id="title" class="form-control" placeholder="Task Title" required>
+          </div>
+          <div class="col-md-6">
+            <label for="dueDate" class="form-label">Due Date</label>
+            <input type="datetime-local" id="dueDate" class="form-control" required>
+          </div>
+          <div class="col-md-12">
+            <textarea id="description" class="form-control" 
+                     placeholder="Task Description" rows="3"></textarea>
+          </div>
+          <div class="col-md-4">
+            <select id="category" class="form-select" required>
+              <option value="">Select Category</option>
+              <option>Study</option>
+              <option>Project</option>
+              <option>Research</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <select id="priority" class="form-select" required>
+              <option value="">Select Priority</option>
+              <option>HIGH</option>
+              <option>MEDIUM</option>
+              <option>LOW</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="bi bi-send-check"></i> Assign Tasks
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Assigned Tasks List -->
+  <div class="card">
+    <div class="card-body">
+      <h4 class="card-title">Previously Assigned Tasks</h4>
+      <div id="myAssignments" class="row"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+
+
+
+
+
+            const userId = parseInt(localStorage.getItem('userId'));
+
+            let selectedMember= null; // Store only one selected member
+
+document.addEventListener("DOMContentLoaded", async function () {
+    // Load groups and previous assignments
+    await loadGroups();
+    await loadPreviousAssignments();
+});
+
+// Function to load groups
+async function loadGroups() {
+    const groupContainer = document.getElementById("groupsContainer");
+    try {
+        const response = await fetch(`/assignments/my-groups/${userId}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const groups = await response.json();
+
+        groupContainer.innerHTML = "";
+
+        if (groups.length === 0) {
+            groupContainer.innerHTML = "<p>You are not in any study groups.</p>";
+            return;
+        }
+
+        groups.forEach(group => {
+            const groupDiv = document.createElement("div");
+            groupDiv.classList.add("col-md-4", "mb-3");
+            groupDiv.innerHTML = `
+                <div class="card group-card">
+                    <div class="card-body">
+                        <h5 class="card-title">${group.name}</h5>
+                        <p class="card-text">${group.description}</p>
+                        <button class="btn btn-outline-primary view-members-btn" 
+                                data-group-id="${group.groupId}">
+                            View Members
+                        </button>
+                    </div>
+                </div>
+            `;
+            groupContainer.appendChild(groupDiv);
+        });
+
+        // Add event listeners to view members buttons
+        document.querySelectorAll(".view-members-btn").forEach(button => {
+            button.addEventListener("click", async function () {
+                const groupId = this.dataset.groupId;
+                await fetchGroupMembers(groupId);
+            });
+        });
+
+    } catch (error) {
+        console.error("Error loading groups:", error);
+        groupContainer.innerHTML = `<p class="text-danger">Error loading groups: ${error.message}</p>`;
+    }
+}
+
+// Function to fetch and display group members
+async function fetchGroupMembers(groupId) {
+        try {
+            const response = await fetch(`/assignments/${groupId}/members`);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || "Failed to fetch members");
+            }
+
+            const members = await response.json();
+            const memberSection = document.getElementById("memberSection");
+            memberSection.style.display = "block";
+
+            const memberSelection = document.getElementById("memberSelection");
+            memberSelection.innerHTML = members.map(user => `
+                <div class="col-md-3 mb-3">
+                    <div class="card member-card" data-user-id="${user.userId}">
+                        <div class="card-body">
+                            <h5>${user.name}</h5>
+                            <p class="text-muted">${user.email}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+
+            // Add click listeners to member cards *after* they are added to the DOM (CRUCIAL)
+            const memberCards = document.querySelectorAll('.member-card');
+            memberCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const userId = parseInt(card.dataset.userId);
+                    toggleMemberSelection(userId);
+                });
+            });
+
+
+        } catch (error) {
+            console.error("Error fetching members:", error);
+            alert(`Error: ${error.message}`);
+        }
+    }
+
+
+    function toggleMemberSelection(userId) {
+  const memberCards = document.querySelectorAll('.member-card');
+  
+  // Deselect all cards
+  memberCards.forEach(card => card.classList.remove('selected'));
+  
+  // If the same member is clicked again, deselect
+  if (selectedMember === userId) {
+    selectedMember = null;
+  } else {
+    selectedMember = userId;
+    const selectedCard = document.querySelector(`.member-card[data-user-id="${userId}"]`);
+    if (selectedCard) {
+      selectedCard.classList.add('selected');
+    }
+  }
+}
+// Function to submit the task assignment form
+document.getElementById("assignmentForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const taskData = {
+    title: document.getElementById("title").value,
+    dueDate: document.getElementById("dueDate").value,
+    description: document.getElementById("description").value,
+    category: document.getElementById("category").value,
+    priority: document.getElementById("priority").value,
+    assigneeIds: selectedMember,
+    assignerId: parseInt(localStorage.getItem('userId'))
+  };
+
+  try {
+    const response = await fetch(`/assignments/assign/${taskData.assignerId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(taskData)
+    });
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.error || 'Task assignment failed');
+    }
+
+    alert("Tasks assigned successfully!");
+    resetForm();
+    await loadPreviousAssignments(); // Refresh the task list
+  } catch (error) {
+    console.error("Assignment error:", error);
+    alert(`Error: ${error.message}`);
+  }
+});
+
+// Function to reset the form and selection
+function resetForm() {
+    document.getElementById("assignmentForm").reset();
+    selectedMember= null; // Reset selected member
+    document.getElementById("memberSection").style.display = "none";
+    document.querySelectorAll(".member-card").forEach(card => {
+        card.classList.remove('selected'); // Remove selected class from all cards
+    });
+}
+
+async function loadPreviousAssignments() {
+    try {
+        const response = await fetch(`/assignments/assigned-by-me/${userId}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const tasks = await response.json();
+        renderPreviousAssignments(tasks);
+    } catch (error) {
+        console.error("Error loading previous assignments:", error);
+        showError("Failed to load previous assignments.");
+    }
+}
+
+function renderPreviousAssignments(tasks) {
+    const container = document.getElementById("myAssignments");
+    container.innerHTML = tasks.map(task => {
+
+        return `
+            <div class="col-md-4 mb-3">
+                <div class="card assignment-card">
+                    <div class="card-body">
+                        <h5>${task.title}</h5>
+                        <p class="text-muted">Assigned to User with Id: ${task.assigneeId}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-${getStatusColor(task.status)}">${task.status}</span>
+                            <small class="text-muted">${new Date(task.createdAt).toLocaleDateString()}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+function getStatusColor(status) {
+    return {
+        PENDING: "warning",
+        ACCEPTED: "success",
+        REJECTED: "danger"
+    }[status];
+}
+
+// In your HTML script
+document.getElementById("assignmentForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const taskData = {
+    title: document.getElementById("title").value,
+    dueDate: document.getElementById("dueDate").value,
+    description: document.getElementById("description").value,
+    category: document.getElementById("category").value,
+    priority: document.getElementById("priority").value,
+    assigneeId: selectedMember, // Changed to singular
+    assignerId: parseInt(localStorage.getItem('userId'))
+  };
+
+  try {
+    const response = await fetch(`/assignments/assign/${taskData.assignerId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(taskData)
+    });
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to assign tasks');
+    }
+
+    alert('Tasks assigned successfully!');
+    resetForm();
+    await loadPreviousAssignments();
+  } catch (error) {
+    console.error('Assignment error:', error);
+    showError(`Error: ${error.message}`);
+  }
+});
+
+
+function validateForm(taskData) {
+  const errors = [];
+  
+  if (!taskData.title.trim()) {
+    errors.push('Title is required');
+  }
+  
+  if (!taskData.dueDate) {
+    errors.push('Due date is required');
+  } else if (isNaN(new Date(taskData.dueDate).getTime())) {
+    errors.push('Invalid due date');
+  }
+  
+  if (!selectedMember) {
+    errors.push('Please select a member');
+  }
+  
+  if (errors.length > 0) {
+    showError(errors.join('\n'));
+    return false;
+  }
+  
+  return true;
+}
+
+function resetForm() {
+  document.getElementById("assignmentForm").reset();
+  selectedMember = null; // Reset selected member
+  document.getElementById("memberSection").style.display = "none";
+  document.querySelectorAll(".member-card").forEach(card => {
+    card.classList.remove('selected'); // Remove selected class from all cards
+  });
+}
+    </script>
+</body>
+</html>

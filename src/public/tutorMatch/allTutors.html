@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Tutors</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+  
+    .tutor-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .tutor-header {
+      margin-bottom: 10px;
+    }
+
+    .availability-slot {
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .tutor-card:hover {
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      transition: 0.2s;
+    }
+
+    /* Base Button Style */
+.details-btn {
+  background-color: #fdf4d7!important; /* Button background color */
+  color: black; /* Text color */
+  border: none; /* Remove border */
+  padding: 10px 20px; /* Padding for size */
+  font-size: 16px; /* Font size */
+  border-radius: 8px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effects */
+}
+
+/* Hover Effect */
+.details-btn:hover {
+  background-color: #d4a373!important; /* Darker background on hover */
+  color: white!important; /* Text color */
+  transform: scale(1.05); /* Slightly enlarge the button */
+}
+
+.reset-and-apply-btn {
+  background-color: #d0d4ac; /* Button background color */
+  color: black; /* Text color */
+  border: none; /* Remove border */
+  padding: 10px 20px; /* Padding for size */
+  font-size: 16px; /* Font size */
+  border-radius: 8px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effects */
+}
+
+/* Hover Effect */
+.reset-and-apply-btn:hover {
+
+  transform: scale(1.05); /* Slightly enlarge the button */
+}
+
+  </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div id="navbar-container"></div>
+
+
+  <div class="container mt-5">
+    <h1 class="mb-4">All Tutors</h1>
+
+    <!-- Filter Section -->
+    <div class="mb-4">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label for="dayFilter" class="form-label">Filter by Day</label>
+          <select id="dayFilter" class="form-select">
+            <option value="">All Days</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+            <option value="Sunday">Sunday</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label for="subjectFilter" class="form-label">Filter by Subject</label>
+          <select id="subjectFilter" class="form-select">
+            <option value="">All Subjects</option>
+            <!-- Subjects will be dynamically populated -->
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label for="nameSearch" class="form-label">Search by Name</label>
+          <input type="text" id="nameSearch" class="form-control" placeholder="Enter tutor name">
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end">
+          <button id="applyFilters" class="reset-and-apply-btn w-50">Apply Filters</button>
+        </div>
+
+           <!-- Reset Filters Button -->
+      <div class="mt-3 w-50">
+        <button id="resetFilters" class="reset-and-apply-btn">Reset Filters</button>
+      </div>
+      </div>
+
+   
+    </div>
+
+    <!-- Tutors List -->
+    <div id="tutors-list" class="row">
+      <!-- Tutors will be dynamically populated here -->
+    </div>
+  </div>
+
+  <!-- Include Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Custom JavaScript -->
+  <script>
+ 
+
+    console.log("the local storage is",localStorage);
+    document.addEventListener('DOMContentLoaded', () => {
+      // Fetch all tutors and subjects on page load
+      fetchTutors();
+      fetchSubjects();
+
+      // Add event listener to the "Apply Filters" button
+      document.getElementById('applyFilters').addEventListener('click', () => {
+        const day = document.getElementById('dayFilter').value;
+        const subject = document.getElementById('subjectFilter').value;
+        const name = document.getElementById('nameSearch').value;
+
+        // Fetch tutors with the selected filters
+        fetchTutors({ day, subject, name });
+      });
+
+      // Add event listener to the "Reset Filters" button
+      document.getElementById('resetFilters').addEventListener('click', () => {
+        resetFilters();
+      });
+    });
+
+    // Fetch all tutors with optional filters
+    async function fetchTutors(filters = {}) {
+      try {
+        const queryParams = new URLSearchParams(filters).toString();
+        const response = await fetch(`/tutor/filtered-tutors?${queryParams}`);
+
+        if (!response.ok) throw new Error('Failed to fetch tutors');
+
+        const tutors = await response.json();
+        displayTutors(tutors);
+      } catch (error) {
+        console.error('Error fetching tutors:', error);
+        alert('Failed to load tutors.');
+      }
+    }
+
+    // Fetch all unique subjects and populate the "Filter by Subject" dropdown
+    async function fetchSubjects() {
+      try {
+        const response = await fetch(`/tutor/subjects`);
+
+        if (!response.ok) throw new Error('Failed to fetch subjects');
+
+        const subjects = await response.json();
+        populateSubjectsDropdown(subjects);
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+        alert('Failed to load subjects.');
+      }
+    }
+
+    // Populate the "Filter by Subject" dropdown
+    function populateSubjectsDropdown(subjects) {
+      const subjectFilter = document.getElementById('subjectFilter');
+
+      subjects.forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject;
+        option.textContent = subject;
+        subjectFilter.appendChild(option);
+      });
+    }
+
+    // Display tutors in the tutor list section
+function displayTutors(tutors) {
+  const tutorsList = document.getElementById('tutors-list');
+
+  if (!tutors.length) {
+    tutorsList.innerHTML = '<p>No tutors found.</p>';
+    return;
+  }
+
+  tutorsList.innerHTML = tutors.map(tutor => `
+    <div class="col-md-4">
+      <div class="tutor-card">
+        <div class="tutor-header">
+          <h4>${tutor.name}</h4>
+          <p><strong>Subject:</strong> ${tutor.subject}</p>
+        </div>
+        <p><strong>Rating:</strong> ${tutor.rating} ⭐</p>
+        <p><strong>Experience:</strong> ${tutor.experience} years</p>
+        <button class="btn details-btn w-100 mt-3" onclick="viewDetails('${tutor.tutorId}')">
+          View Details
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+
+    // Function to navigate to the tutor details page
+function viewDetails(tutorId) {
+  // Redirect to the tutor details page
+  window.location.href = `/tutorMatch/tutorDetails.html?tutorId=${tutorId}`;
+}
+
+
+    // Reset all filters to their default values and fetch all tutors
+    function resetFilters() {
+      document.getElementById('dayFilter').value = '';
+      document.getElementById('subjectFilter').value = '';
+      document.getElementById('nameSearch').value = '';
+
+      fetchTutors(); // Fetch all tutors
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+      fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+    });
+  </script>
+</body>
+</html>

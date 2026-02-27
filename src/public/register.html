@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Page</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: #fefae0;
+        }
+
+        .register-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #FAEDCD;
+        }
+
+        .form-control {
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: #d4a373;
+            border-color: #d4a373;
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background-color: #b6c498;
+            border-color: #b6c498;
+        }
+
+        .btn-secondary {
+            background-color: #E9EDC9;
+            border-color: #E9EDC9;
+            color: black;
+        }
+
+        .btn-secondary:hover {
+            background-color: #b6c498;
+            border-color: #b6c498;
+        }
+
+        .btn-custom {
+            max-width: 300px;
+            width: 100%;
+        }
+
+        /* Custom Modal Styling */
+        .modal-content.custom-popover {
+            border-color: var(--bs-popover-border-color, #6f42c1);
+            /* Example: Violet border */
+            background-color: var(--bs-popover-header-bg, #6f42c1);
+            /* Background color */
+            color: var(--bs-popover-header-color, #fff);
+            /* Text color */
+        }
+
+        .modal-header.custom-popover {
+            background-color: var(--bs-popover-header-bg, #6f42c1);
+            color: var(--bs-popover-header-color, #fff);
+        }
+
+        .modal-footer.custom-popover {
+            border-top: 1px solid var(--bs-popover-border-color, #6f42c1);
+        }
+
+        .modal-body.custom-popover {
+            padding: var(--bs-popover-body-padding-y, 0.5rem) var(--bs-popover-body-padding-x, 1rem);
+        }
+
+
+        #alertModal {
+            z-index: 1060 !important;
+            /* Higher than other modals and backdrops */
+        }
+
+        .modal-backdrop.alert-backdrop {
+            z-index: 1055 !important;
+            /* Place the backdrop just below the alert modal */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container my-5">
+        <div class="register-container">
+            <h3 class="text-center mb-4">Register</h3>
+            <form id="registerForm">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                    <div class="form-text">Email format must be: <br> <code>name.year@ichat.sp.edu.sg</code>, e.g.,
+                        <code>isaac.23@ichat.sp.edu.sg</code> or <code>isaac_kwok.20@ichat.sp.edu.sg</code>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password:</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                    <div class="form-text">Password must be at least 8 characters long, include a lowercase letter, an
+                        uppercase letter, a special character, and a number.</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary mb-3">Register</button>
+                <button type="button" class="btn btn-secondary"
+                    onclick="window.location.href='login.html'">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- General Alert Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered alertModal">
+            <div class="modal-content custom-popover">
+                <div class="modal-header custom-popover">
+                    <h5 class="modal-title" id="alertModalLabel">Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body custom-popover" id="alertModalBody">
+                    <!-- Alert content will be dynamically inserted here -->
+                </div>
+                <div class="modal-footer custom-popover">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent form submission
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            // Regular expression to validate the password
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+            // Regular expression to validate the email format
+            const emailRegex = /^[a-zA-Z0-9_]+(?:[a-zA-Z0-9_]+)?\.\d{1,3}@ichat\.sp\.edu\.sg$/;
+
+
+            if (!passwordRegex.test(password)) {
+                showAlertModal('Password does not meet the requirements.');
+                return;
+            }
+
+            if (!emailRegex.test(email)) {
+                showAlertModal('Email format is invalid. Ensure it follows the pattern "name.year@ichat.sp.edu.sg".');
+                return;
+            }
+
+            // Extract the name from the email
+            const namePart = email.split('.')[0]; // Get part before @
+            const formattedName = namePart
+                .split(/[\._]/) // Split by '.' or '_'
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each part
+                .join(' '); // Join with spaces
+
+            // Send the request with email, password, and name as JSON data using fetch
+            fetch("/users/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email: email, password: password, name: formattedName })
+            })
+                .then(function (response) {
+                    if (response.status === 201) {
+                        // Show the registration success modal
+                        showAlertModal('Registration successful!', 'Success', function () {
+                            // After clicking OK on the success modal, perform login with the same credentials
+                            loginUser(email, password);
+                        });
+                    } else {
+                        response.json().then(function (data) {
+                            // Show the error message if registration failed
+                            showAlertModal(data.message);
+                        });
+                    }
+                })
+                .catch(function (error) {
+                    console.log('Error:', error);
+                });
+        });
+
+        // Function to login user after successful registration
+        function loginUser(email, password) {
+            // Send the request with email and password as JSON data using fetch
+            fetch("/users/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email: email, password: password })
+            })
+                .then(function (response) {
+                    if (response.status === 200) {
+                        response.json().then(function (data) {
+                            console.log("Token:", data.token);
+
+                            // Store token, email, userId, and userRole in localStorage
+                            localStorage.setItem("token", data.token);
+                            localStorage.setItem("email", data.email);
+                            localStorage.setItem("userId", data.userId);
+                            localStorage.setItem("userRole", data.userRole);
+                            localStorage.setItem("isTutor", data.isTutor);
+
+                            // Update login details
+                            fetch("/users/updateLoginDetails", {
+                                method: "PUT",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": `Bearer ${data.token}`
+                                },
+                                body: JSON.stringify({ userId: data.userId, login_time: new Date().toISOString() })
+                            })
+                                .then(function (updateResponse) {
+                                    if (updateResponse.status !== 200) {
+                                        updateResponse.json().then(function (updateData) {
+                                            showAlertModal("Failed to update login details: " + updateData.message);
+                                        });
+                                    }
+                                })
+                                .catch(function (updateError) {
+                                    console.log("Error updating login details:", updateError);
+                                });
+
+                            console.log(data + "data  after logging in");
+                            console.log(data.userRole + " user role after logging in");
+
+                            // Redirect based on userRole
+                            if (data.userRole === "ADMIN") {
+                                window.location.href = "/admin/manageSuggestions.html";
+                            } else {
+                                window.location.href = "/profile/profile.html";
+                            }
+                        });
+                    } else {
+                        // Display an alert for failed login
+                        showAlertModal("Login failed. Please check your email and password.");
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Error:", error);
+                    showAlertModal("An error occurred. Please try again later.");
+                });
+        }
+
+        // Function to show the custom alert modal
+        function showAlertModal(message, title = "Notification", callback) {
+            const alertModal = new bootstrap.Modal(document.getElementById('alertModal'), {
+                backdrop: true, // Ensure a backdrop is used
+            });
+            const alertModalTitle = document.getElementById('alertModalLabel');
+            const alertModalBody = document.getElementById('alertModalBody');
+
+            // Update modal title and message
+            alertModalTitle.textContent = title;
+            alertModalBody.textContent = message;
+
+            // Show the modal
+            alertModal.show();
+
+            // Handle custom backdrop logic specifically for alertModal
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.classList.add('alert-backdrop'); // Add custom class
+            }
+
+            // Clean up the custom backdrop and restore Bootstrap's default behavior
+            const alertModalElement = document.getElementById('alertModal');
+            const removeCustomBackdrop = () => {
+                const customBackdrop = document.querySelector('.modal-backdrop.alert-backdrop');
+                if (customBackdrop) {
+                    customBackdrop.classList.remove('alert-backdrop'); // Remove custom class
+                }
+                alertModalElement.removeEventListener('hidden.bs.modal', removeCustomBackdrop); // Cleanup listener
+            };
+
+            // If a callback is provided, execute it after the modal is closed
+            if (callback) {
+                alertModalElement.addEventListener('hidden.bs.modal', () => {
+                    callback(); // Trigger the callback function once the modal is closed
+                    alertModalElement.removeEventListener('hidden.bs.modal', removeCustomBackdrop);
+                });
+            }
+
+            alertModalElement.addEventListener('hidden.bs.modal', removeCustomBackdrop);
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Study Groups</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .tab-content {
+            margin-top: 20px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .btn-custom {
+            background-color: #deb183 !important;
+            color: black;
+            border: none;
+        }
+
+        .form-control {
+            max-width: 500px;
+            /* Set a fixed maximum width */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-container" class="mb-3"></div>
+    <div class="container">
+        <h1>Your Study Groups</h1>
+        <div id="joinedGroupsContainer" class="row g-3 mt-4 m-3 mb-5">
+            <!-- Joined groups will be dynamically populated here -->
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="userStudyGroups.js"></script>
+        <script>
+            // Function to load the navbar into the page
+            document.addEventListener('DOMContentLoaded', () => {
+                fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+            });
+        </script>
+</body>
+
+</html>

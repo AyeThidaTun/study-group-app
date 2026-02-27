@@ -1,0 +1,685 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id       Int              @id @default(autoincrement())
+  name     String
+  statusId Int
+  status   Status           @relation(fields: [statusId], references: [id])
+  persons  TaskAssignment[]
+}
+
+model Status {
+  id    Int    @id @default(autoincrement())
+  text  String @unique
+  tasks Task[]
+}
+
+model Person {
+  id     Int              @id @default(autoincrement())
+  email  String           @unique
+  name   String
+  avatar String?
+  tasks  TaskAssignment[]
+}
+
+model TaskAssignment {
+  taskId     Int
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  personId   Int
+  person     Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  assignedAt DateTime @default(now())
+
+  @@id(name: "assignmentId", [taskId, personId])
+}
+
+// ##############################################################
+// Isaac's Entities Start
+// ##############################################################
+// Enum for User roles
+enum UserRole {
+  USER   // Default role for regular users
+  ADMIN  // Role for admin users
+}
+
+model User {
+  userId           Int      @id @default(autoincrement())
+  email            String   @unique
+  password         String   // Added the password field
+  name             String
+  points           Int      @default(0)  // Added the points field
+  lastLogin        DateTime @default(now()) // Added the lastLogin field with default
+  avatarId         Int      @default(1) // Default avatarId to 1
+  avatar           Avatar   @relation(fields: [avatarId], references: [avatarId]) // Add the relation to Avatar
+  isTutor          Boolean  @default(false) // Added by Alice
+  bio              String?  // Added the bio field
+  academicLevel    String?  // Added the academicLevel field
+  skills           String?  // Added the skills field
+  subjectInterests String?  // Added the subjectInterests field
+  adminNumber      String?  // Added the adminNumber field
+  userRole         UserRole @default(USER) // User role (defaults to USER, can be ADMIN)
+  status           String   @default("OFFLINE") // User status (Tracks online/offline status)
+  lastActivity     DateTime?  // Nullable timestamp to track the user's last activity
+  quiz              Quiz[]              // Added by Isaac
+  quizAttempts      QuizAttempt[]       // Added by Isaac
+  suggestions       Suggestion[]        // Added by Isaac
+  DeckProgress      DeckProgress[]      // Added by Isaac
+  UserNotification  UserNotification[]  // Added by Isaac
+  PointsTransaction PointsTransaction[] // Added by Isaac
+  questions         Question[]          // Added by Redwan
+  answers           Answer[]            // Added by Redwan
+  savedQuestions    SavedQuestion[]     // Added by Redwan
+  likes             Like[]              // Added by Redwan
+  Todo              Todo[]              // Added by Redwan
+  bookmark          Bookmark[]          // Added by Alice
+  resource          Resource[]          // Added by Alice
+  tags              Tag[]               // Added by Alice
+  resourceTags      ResourceTag[]       // Added by Alice
+  tutorProfile      TutorProfile?       // Added by Alice
+  studyGroup        UserStudyGroup[]    // Added by Anna
+  Messages          Message[]           // Added by Anna
+  tutorBookings     TutorBooking[]      // Added to reference TutorBooking
+  givenFeedbacks    Feedback[] @relation("feedback_giver")     // Added by Anna
+  receivedFeedbacks Feedback[] @relation("feedback_receiver")  // Added by Anna
+  Inventory Inventory[]                 // Added by Isaac
+  Poll Poll[] @relation("PollCreator")  // Added by Anna
+  assignedTasksAssigned AssignedTask[] @relation("AssignedTaskAssigner") // Added by Redwan
+  assignedTasksReceived AssignedTask[] @relation("AssignedTaskAssignee") // Added by Redwan
+}
+
+// Suggestion Model
+model Suggestion {
+  id          Int       @id @default(autoincrement()) // Unique ID for the suggestion
+  title       String    // Title of the suggestion
+  description String    // Body description
+  tags        String[]  // Tags associated with the suggestion (stored as an array)
+  status      SuggestionStatus @default(DRAFT) // Status of the suggestion: DRAFT, PENDING, APPROVED, REJECTED
+  createdAt   DateTime  @default(now()) // Timestamp when the suggestion was created
+  createdById Int       // User ID of the creator
+  createdBy   User      @relation(fields: [createdById], references: [userId], onDelete: Cascade, onUpdate: NoAction) // Relation to User model
+  reason      String?   // Reason for approval or rejection (optional)
+
+  @@index([status]) // Index to filter suggestions by status
+}
+
+// Enum for the status of suggestions
+enum SuggestionStatus {
+  DRAFT     // Suggestion is a draft (not yet submitted)
+  PENDING   // Suggestion is pending approval from the admin
+  APPROVED  // Suggestion has been approved by the admin
+  REJECTED  // Suggestion has been rejected by the admin
+}
+
+model Avatar {
+  avatarId   Int    @id @default(autoincrement()) // Primary key
+  imageName  String // Avatar image filename (e.g., avatar_001.png)
+  users      User[] // Relation back to the User model
+}
+
+model Quiz {
+  quizId     Int        @id @default(autoincrement())
+  modCode    String     // Module code associated with the quiz (relates to Module table) - Used to identify school
+  topic      String     // Topic of the quiz
+  year       String     // Academic year (e.g., AY2024/2025)
+  semester   String     // Semester (e.g., Semester 1)
+  createdAt  DateTime   @default(now())
+  createdById Int       // User who created the quiz
+  createdBy  User       @relation(fields: [createdById], references: [userId])
+  questions  QuizQuestion[] // Relation to QuizQuestion table
+  attempts   QuizAttempt[]  // Relation to track attempts
+  module     Module     @relation(fields: [modCode], references: [modCode])
+}
+
+model QuizItem {
+  itemId    Int              @id @default(autoincrement())
+  text      String           // Question text
+  option1   String           // Option 1
+  option2   String           // Option 2
+  option3   String           // Option 3
+  option4   String           // Option 4
+  answer    String           // Correct answer (e.g., "option1", "option2")
+  quizzes   QuizQuestion[]   // Relation to QuizQuestion table
+}
+
+model QuizQuestion {
+  id         Int              @id @default(autoincrement())
+  quizId     Int
+  itemId     Int
+  quiz       Quiz             @relation(fields: [quizId], references: [quizId], onDelete: Cascade)
+  quizItem   QuizItem         @relation(fields: [itemId], references: [itemId], onDelete: Cascade)
+
+  @@unique([quizId, itemId])
+}
+
+model QuizAttempt {
+  attemptId  Int              @id @default(autoincrement())
+  quizId     Int
+  userId     Int
+  status     String           @default("In Progress") // Defaults to 'In Progress' and updates to 'Completed' when finished
+  score      Int?             // Score of the attempt
+  startedAt  DateTime?        // When the attempt started
+  endedAt    DateTime?        // When the attempt ended
+  progress   Json?            // JSON to store user progress (e.g., questions answered)
+  quiz       Quiz             @relation(fields: [quizId], references: [quizId], onDelete: Cascade)
+  user       User             @relation(fields: [userId], references: [userId], onDelete: Cascade)
+}
+
+// School Table
+model School {
+  id       Int     @id @default(autoincrement())
+  fullName String  // Full name of the school
+  shortName String  // Short name (e.g., SOC, ABE)
+  modules  Module[] // Relation to Module table
+}
+
+// Module Table
+model Module {
+  modCode  String  @id  // Set modCode as the primary key
+  modName  String  // Module name (e.g., J2EE Application Development)
+  schoolId Int     // Foreign key to School
+  school   School  @relation(fields: [schoolId], references: [id])
+  quizzes  Quiz[]  // Relationship with quizzes
+  questions Question[] // Relationship with questions
+  decks Deck[] // Relationship with decks
+}
+
+// CA2 Entities
+model Deck {
+  deckId      Int       @id @default(autoincrement())
+  modCode    String     // Module code associated with the quiz (relates to Module table) - Used to identify school
+  topic      String     // Topic of the quiz
+  year       String     // Academic year (e.g., AY2024/2025)
+  semester   String     // Semester (e.g., Semester 1)
+  name        String
+  description String?   // Optional description for the deck
+  Flashcards  Flashcard[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  module     Module     @relation(fields: [modCode], references: [modCode])
+  DeckProgress DeckProgress[]
+}
+
+model Flashcard {
+  flashcardId          Int       @id @default(autoincrement())
+  title       String
+  content     String
+  tags        String[]  // Array of tags for categorization
+  deckId      Int
+  Deck        Deck      @relation(fields: [deckId], references: [deckId])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model DeckProgress { // New model for tracking deck-level progress
+  deckProgressId     Int       @id @default(autoincrement())
+  userId      Int       // User ID
+  deckId      Int       // Deck ID
+  progress    Int       @default(0) // E.g., 0 = not started, 1 = in progress, 2 = mastered
+  lastReviewed DateTime? // Tracks the last review date
+  User        User      @relation(fields: [userId], references: [userId])
+  Deck        Deck      @relation(fields: [deckId], references: [deckId])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  productId   String   @id @default(uuid()) // Unique ID for each product
+  name        String
+  description String?
+  category    String   // e.g., "Merchandise" or "CCA Points"
+  price       Int      @default(0) // Number of points needed to purchase the product
+  stock       Int      @default(0) // Stock quantity
+  numberSold  Int      @default(0) // Number of items sold
+  status      ProductStatus   @default(NOT_RELEASED) // Availability status
+  image       String?  // Path to the product image
+  createdAt   DateTime @default(now()) // Timestamp for creation
+  updatedAt   DateTime @updatedAt // Auto-updated timestamp
+  Inventory   Inventory[] // Reference to Inventory
+}
+
+enum ProductStatus {
+  IN_STOCK
+  SOLD_OUT
+  NOT_RELEASED
+}
+
+model Inventory {
+  inventoryId         String  @id @default(uuid()) 
+  userId        Int      // Foreign key to User
+  productId  String  
+  quantity   Int     @default(1)
+  purchasedAt DateTime @default(now())
+  redeemed     Boolean  @default(false) // Tracks if the item has been redeemed
+  user       User    @relation(fields: [userId], references: [userId])
+  product    Product @relation(fields: [productId], references: [productId])
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  type        NotificationType
+  title       String?  // Optional; some notifications may not have a title
+  message     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isGlobal    Boolean  @default(false) // True for global announcements
+
+  UserNotification UserNotification[]
+}
+
+model UserNotification {
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  notificationId Int
+  status         NotificationStatus @default(UNREAD) // UNREAD or READ
+  createdAt      DateTime           @default(now())
+
+  user           User          @relation(fields: [userId], references: [userId])
+  notification   Notification  @relation(fields: [notificationId], references: [id])
+
+  @@unique([userId, notificationId]) // Ensures a user cannot have duplicate entries
+}
+
+enum NotificationType {
+  ANNOUNCEMENT
+  PERSONAL
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+}
+
+model PointsTransaction {
+  pointsTransactionId Int      @id @default(autoincrement())
+  userId        Int      // Foreign key to User
+  points        Int      // Points earned or spent (can be positive or negative)
+  type          String   // Type of transaction (e.g., "QUIZ", "FLASHCARD", "PURCHASE", etc.)
+  description   String?  // Optional description of the transaction
+  createdAt     DateTime @default(now()) // Timestamp of the transaction
+  user          User     @relation(fields: [userId], references: [userId])
+}
+
+model PointsRule {
+  ruleId      Int      @id @default(autoincrement())
+  type        String   // e.g., "QUIZ", "FLASHCARD"
+  calculation String   // e.g., "quizAccuracy", "flashcardLength", "fixed"
+  description String   // Explains how the rule works
+  createdAt   DateTime @default(now())
+}
+// ##############################################################
+// Isaac's Entities End
+// ##############################################################
+
+// ##############################################################
+// Redwan's Entities Start
+// ##############################################################
+model Question {
+  questionID Int      @id @default(autoincrement())
+  userID     Int
+  title      String
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime?
+  filePath   String?  // Path to uploaded document/image
+  modCode    String
+  status     QuestionStatus @default(ACTIVE) // Enum for question status
+  likes      Int      @default(0)
+  user       User     @relation(fields: [userID], references: [userId], onDelete: Cascade, onUpdate: Cascade) 
+  module     Module   @relation(fields: [modCode], references: [modCode], onDelete: NoAction, onUpdate: NoAction)
+  answers    Answer[]
+  likesList  Like[]   @relation("QuestionLikes") 
+  savedBy    SavedQuestion[] // Link to saved questions
+}
+
+model Answer {
+  answerID   Int      @id @default(autoincrement())
+  questionID Int
+  userID     Int
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime? 
+  filePath   String?  // Path to uploaded document/image
+  status     AnswerStatus @default(DRAFT) // Enum for answer status
+  likes      Int      @default(0)
+  user       User     @relation(fields: [userID], references: [userId], onDelete: Cascade, onUpdate: Cascade) 
+  question   Question @relation(fields: [questionID], references: [questionID], onDelete: Cascade, onUpdate: NoAction) 
+  likesList  Like[]   @relation("AnswerLikes") 
+}
+
+model Like {
+  likeID     Int      @id @default(autoincrement())
+  userID     Int
+  questionID Int?    
+  answerID   Int?     
+  user       User     @relation(fields: [userID], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  question   Question? @relation("QuestionLikes", fields: [questionID], references: [questionID], onDelete: Cascade, onUpdate: NoAction)
+  answer     Answer?   @relation("AnswerLikes", fields: [answerID], references: [answerID], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model SavedQuestion {
+  id          Int      @id @default(autoincrement())
+  userID      Int
+  questionID  Int?    
+  answerID    Int?     
+  user        User     @relation(fields: [userID], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  question    Question? @relation(fields: [questionID], references: [questionID], onDelete: Cascade, onUpdate: NoAction)
+}
+
+enum QuestionStatus {
+  ACTIVE
+  ARCHIVED
+  SOLVED
+}
+
+enum AnswerStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Todo {
+  id         Int          @id @default(autoincrement())
+  userId     Int
+  title      String
+  description String?
+  category   String
+  dueDate    DateTime
+  priority   PriorityLevel
+  completed  Boolean      @default(false)
+  status     TodoStatus   @default(PENDING)
+  mood       Mood?
+  recurring  RecurringTasks @default(NONE)
+  notes      String?      // Additional notes or comments
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  user       User         @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  AssignedTask AssignedTask[]
+}
+
+enum TodoStatus {
+  PENDING
+  COMPLETED
+  ARCHIVED
+}
+
+enum PriorityLevel {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum Mood {
+  HAPPY
+  STRESSED
+  RELAXED
+  NEUTRAL
+}
+
+enum RecurringTasks {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+model AssignedTask {
+  id          Int              @id @default(autoincrement())
+  assignerId  Int
+  assigneeId  Int
+  title       String
+  description String?
+  dueDate     DateTime
+  category    String
+  priority    PriorityLevel
+  status      AssignmentStatus @default(PENDING)
+  todoId      Int?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  assigner    User             @relation("AssignedTaskAssigner", fields: [assignerId], references: [userId])
+  assignee    User             @relation("AssignedTaskAssignee", fields: [assigneeId], references: [userId])
+  todo        Todo?            @relation(fields: [todoId], references: [id])
+}
+
+enum AssignmentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+// ##############################################################
+// Redwan's Entities End
+// ##############################################################
+
+// ##############################################################
+// Alice's Entities Start
+// ##############################################################
+model Bookmark {
+  id          Int             @id @default(autoincrement())
+  userId      Int
+  resourceId  Int
+  createdAt   DateTime?        @default(now()) @db.Timestamp(6)
+  status      BookmarkStatus   @default(UNREAD) // Default status is 'UNREAD'
+  progress    Float?           @default(0.0) // Progress percentage (0 to 100)
+  resource    Resource         @relation(fields: [resourceId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User        User             @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+}
+
+enum BookmarkStatus {
+  UNREAD
+  READING
+  FINISHED
+}
+
+model Resource {
+  id            Int            @id @default(autoincrement())
+  title         String         @db.VarChar(255)
+  description   String?
+  createdById Int
+  createdAt    DateTime?      @default(now()) @db.Timestamp(6)
+  bookmark      Bookmark[]
+  User          User           @relation(fields: [createdById], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+  resourceTag  ResourceTag[]
+}
+
+model ResourceTag {
+  resourceId Int
+  tagId      Int
+  userId       Int            // New userId field
+  resource    Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tag         Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user         User           @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@id([resourceId, tagId])
+}
+
+model Tag {
+  id           Int            @id @default(autoincrement())
+  name         String         @unique @db.VarChar(255)
+  userId       Int            // New userId field
+  resourceTag  ResourceTag[]
+  user         User           @relation(fields: [userId], references: [userId], onDelete: Cascade)
+}
+
+model TutorProfile {
+  tutorId          Int      @id @default(autoincrement())
+  userId           Int      @unique
+  bio              String
+  subject          String   // Single subject expertise
+  rating           Float    @default(0)
+  experience       Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [userId])
+  availabilitySlots AvailabilitySlot[] // Represents the tutor's availability
+}
+
+
+model TutorBooking {
+  id               Int       @id @default(autoincrement())
+  tuteeId          Int
+  slotId           Int
+  durationMonths   Int       @default(1) // Minimum booking duration
+  startDate        DateTime  @default(now())
+  endDate          DateTime  // Calculated based on duration
+  status           String    @default("Pending") // Approved, Cancelled, Completed
+  tutee            User      @relation(fields: [tuteeId], references: [userId])
+  slot             AvailabilitySlot @relation(fields: [slotId], references: [id])
+}
+
+model AvailabilitySlot {
+  id          Int       @id @default(autoincrement())
+  tutorId     Int
+  dayOfWeek   String    // e.g., "Monday", "Tuesday"
+  startTime   String    // Stores only time in HH:mm:ss format
+  endTime     String    // Stores only time in HH:mm:ss format
+  tutor       TutorProfile @relation(fields: [tutorId], references: [tutorId])
+  tutorBookings TutorBooking[]  // Updated to reflect TutorBooking relation
+}
+
+// ##############################################################
+// Alice's Entities End
+// ##############################################################
+
+// ##############################################################
+// Anna's Entities Start
+// ##############################################################
+model StudyRoom {
+  roomId        Int          @id @default(autoincrement())
+  name          String
+  roomType      String
+  location      String
+  capacity      Int  
+  bookings      Booking[]   
+
+  @@index([roomId])
+}
+
+model StudyGroup {
+  groupId       Int          @id @default(autoincrement())
+  name          String
+  description   String
+  createdBy     Int
+  createdAt     DateTime     @default(now())
+  bookings      Booking[]    
+  members       UserStudyGroup[]
+  messages      Message[]        
+
+  @@index([groupId])
+  Poll Poll[]
+}
+
+model UserStudyGroup {
+  userId    Int
+  groupId   Int
+  joinedAt  DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [userId])
+  studyGroup StudyGroup @relation(fields: [groupId], references: [groupId])
+
+  @@id([userId, groupId])
+}
+
+model Booking {
+  bookingId     Int          @id @default(autoincrement())
+  groupId       Int
+  roomId        Int
+  slotId        Int        
+  bookingDate   DateTime
+  status        String    @default("pending") // 'pending', 'confirmed', 'cancelled'
+  timeout       DateTime // Timeout date for confirmation      
+  createdAt     DateTime     @default(now())
+
+  studyGroup    StudyGroup   @relation(fields: [groupId], references: [groupId], onDelete: Cascade)
+  studyRoom     StudyRoom    @relation(fields: [roomId], references: [roomId], onDelete: Cascade)
+  roomSlot      RoomSlot     @relation(fields: [slotId], references: [slotId], onDelete: Cascade)
+  Feedback      Feedback[]
+  @@index([groupId])
+  @@index([roomId])
+}
+
+model RoomSlot {
+  slotId     Int      @id @default(autoincrement())
+  startTime  String   // Example: '9:00 AM'
+  endTime    String   // Example: '10:00 AM'
+  bookings   Booking[]
+
+  @@unique([startTime, endTime]) // Ensures no duplicate time ranges
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  senderId  Int     // userId
+  groupId   Int
+  createdAt DateTime @default(now())
+  sender    User     @relation(fields: [senderId], references: [userId])
+  group     StudyGroup @relation(fields: [groupId], references: [groupId])
+}
+
+enum FeedbackState {
+UNACTIVATED   // Feedback is not ready to be given
+PENDING      // Feedback entry created, awaiting user input
+COMPLETED    // Feedback has been submitted
+EXPIRED      // Feedback submission deadline has passed
+DISCLOSED    // Feedback is now visible to group members
+}
+
+model Feedback {
+feedbackId Int           @id @default(autoincrement())
+bookingId  Int
+giverId    Int           // The user giving the feedback
+receiverId Int           // The user receiving the feedback
+comments   String?       @db.Text
+rating     Float?          // Average or combined rating
+
+state      FeedbackState @default(UNACTIVATED) // Enum-based state
+createdAt  DateTime      @default(now())
+updatedAt  DateTime      @updatedAt
+
+Booking    Booking @relation(fields: [bookingId], references: [bookingId], onDelete: Cascade)
+Giver      User    @relation("feedback_giver", fields: [giverId], references: [userId], onDelete: Cascade)
+Receiver   User    @relation("feedback_receiver", fields: [receiverId], references: [userId], onDelete: Cascade)
+
+@@index([bookingId])
+@@index([giverId])
+@@index([receiverId])
+
+@@unique([bookingId, giverId, receiverId]) 
+}
+
+model Poll {
+  pollId   Int    @id @default(autoincrement())
+  question String
+  groupId  Int
+  createdBy Int
+  createdAt DateTime @default(now())
+
+  options PollOption[]
+  creator User      @relation("PollCreator", fields: [createdBy], references: [userId], onDelete: Cascade)
+  group   StudyGroup @relation(fields: [groupId], references: [groupId])
+}
+
+model PollOption {
+  pollOptionId Int    @id @default(autoincrement())
+  pollId       Int
+  text         String
+  votes        Int    @default(0)
+
+  poll  Poll @relation(fields: [pollId], references: [pollId], onDelete: Cascade)
+}
+
+// ##############################################################
+// Anna's Entities End
+// ##############################################################
+

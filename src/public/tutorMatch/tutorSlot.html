@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutor Availability</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+ <!-- Navbar -->
+ <div id="navbar-container"></div>
+
+  <div class="container mt-5">
+    <h3 class="text-center">Manage Availability</h3>
+
+    <div id="slot-details" class="alert alert-info text-center">
+      Select a slot to edit or delete.
+    </div>
+
+    <button class="btn btn-primary w-100 mb-3" onclick="openSlotForm()">Add New Slot</button>
+
+    <div id="slot-form" class="border p-3 rounded bg-light" style="display:none;">
+      <h5 id="form-title">Add New Slot</h5>
+
+      <input type="hidden" id="slot-id">
+      <label class="form-label">Day:</label>
+      <select id="slot-day" class="form-select mb-2">
+        <option>Monday</option>
+        <option>Tuesday</option>
+        <option>Wednesday</option>
+        <option>Thursday</option>
+        <option>Friday</option>
+        <option>Saturday</option>
+        <option>Sunday</option>
+      </select>
+
+      <label class="form-label">Start Time:</label>
+      <input type="time" id="slot-start" class="form-control mb-2">
+
+      <label class="form-label">End Time:</label>
+      <input type="time" id="slot-end" class="form-control mb-2">
+
+      <div class="d-flex justify-content-between">
+        <button class="btn btn-success" onclick="saveSlot()">Save</button>
+        <button class="btn btn-danger" onclick="closeSlotForm()">Cancel</button>
+      </div>
+    </div>
+
+    <h5 class="mt-4">Your Availability</h5>
+    <div id="availability" class="mt-2"></div>
+  </div>
+
+  <script>
+
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    let tutorId = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      tutorId = await getTutorIdByUserId(userId);
+      if (!tutorId) {
+        alert("Tutor not found!");
+        return;
+      }
+      loadTutorAvailability();
+    });
+
+    async function getTutorIdByUserId(userId) {
+      try {
+        const response = await fetch(`/tutor/tutor-id/${userId}`, {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        const data = await response.json();
+        return data.tutorId;
+      } catch (error) {
+        console.error("Error fetching tutorId:", error);
+      }
+    }
+
+    async function loadTutorAvailability() {
+      try {
+        const response = await fetch(`/tutor/${tutorId}/availability/slot`, {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        const slots = await response.json();
+        displaySlots(slots);
+      } catch (error) {
+        console.error("Error loading availability:", error);
+      }
+    }
+
+    // function displaySlots(slots) {
+    //   const availabilityContainer = document.getElementById('availability');
+    //   availabilityContainer.innerHTML = slots.map(slot => `
+    //   <div class="slot border p-2 mb-2 d-flex justify-content-between align-items-center">
+    //     <p><strong>${slot.dayOfWeek}</strong>: ${slot.startTime} - ${slot.endTime}</p>
+    //     <div>
+    //       <button class="btn btn-warning btn-sm" onclick="editSlot(${slot.id}, '${slot.dayOfWeek}', '${slot.startTime}', '${slot.endTime}')">Edit</button>
+    //       <button class="btn btn-danger btn-sm" onclick="deleteSlot(${slot.id})">Delete</button>
+    //     </div>
+    //   </div>
+    // `).join('');
+    // }
+
+    function formatTime(timeString) {
+  const [hour, minute] = timeString.split(":"); // Extract hours and minutes
+  let hours = parseInt(hour);
+  const period = hours >= 12 ? "PM" : "AM"; // Determine AM/PM
+
+  hours = hours % 12 || 12; // Convert 24-hour to 12-hour format
+
+  return `${hours}${minute !== "00" ? `:${minute}` : ""} ${period}`;
+}
+
+    function displaySlots(slots) {
+  const availabilityContainer = document.getElementById('availability');
+  availabilityContainer.innerHTML = slots.map(slot => `
+    <div class="slot border p-2 mb-2 d-flex justify-content-between align-items-center">
+      <p><strong>${slot.dayOfWeek}</strong>: ${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}</p>
+      <div>
+        <button class="btn btn-warning btn-sm" onclick="editSlot(${slot.id}, '${slot.dayOfWeek}', '${slot.startTime}', '${slot.endTime}')" ${slot.isBooked ? 'disabled' : ''}>Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSlot(${slot.id})" ${slot.isBooked ? 'disabled' : ''}>Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+
+    function openSlotForm() {
+      document.getElementById('slot-form').style.display = 'block';
+      document.getElementById('form-title').innerText = "Add New Slot";
+    }
+
+    function closeSlotForm() {
+      document.getElementById('slot-form').style.display = 'none';
+    }
+
+    function editSlot(id, day, start, end) {
+      document.getElementById('slot-id').value = id;
+      document.getElementById('slot-day').value = day;
+      document.getElementById('slot-start').value = start;
+      document.getElementById('slot-end').value = end;
+      document.getElementById('form-title').innerText = "Edit Slot";
+      document.getElementById('slot-form').style.display = 'block';
+    }
+
+
+    async function saveSlot() {
+  const id = document.getElementById('slot-id').value;
+  const slotData = {
+    dayOfWeek: document.getElementById('slot-day').value,
+    startTime: document.getElementById('slot-start').value,
+    endTime: document.getElementById('slot-end').value
+  };
+
+  const method = id ? 'PUT' : 'POST';
+  const url = id ? `/tutor/${tutorId}/availability/${id}` : `/tutor/${tutorId}/availability`;
+
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(slotData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Schedule is conflicting with another slot");
+    }
+
+    // Success: Refresh availability and close form
+    loadTutorAvailability();
+    closeSlotForm();
+  } catch (error) {
+    alert(error.message || "Error saving slot."); 
+  }
+}
+
+
+
+    async function deleteSlot(slotId) {
+      try {
+        const response = await fetch(`/tutor/${tutorId}/availability/${slotId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to delete slot.");
+        }
+
+        alert("Slot deleted successfully!");
+        loadTutorAvailability();
+      } catch (error) {
+        alert(error.message || "Error deleting slot.");
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+      fetch('../tutorNavbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+    });
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+body {
+  font-family: 'Sour Gummy', serif;
+  background-color: #fdf4d7;
+}
+
+.container h1 {
+  font-size: 2.5rem;
+  color: #cd9b62;
+  font-weight: bold;
+}
+
+.cart-title h2 {
+  font-size: 1.8rem;
+  color: #8c6e47;
+  font-weight: bold;
+}
+
+#taskDetails {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}

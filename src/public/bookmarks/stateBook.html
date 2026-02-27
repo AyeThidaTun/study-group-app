@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookmarks</title>
+  <!-- <link rel="stylesheet" href="styles.css"> -->
+  <style>
+    /* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background-color: #f4f4f9;
+  color: #333;
+  line-height: 1.6;
+}
+
+.header {
+  text-align: center;
+  padding: 2rem 1rem;
+  background-color: #3e4eb8;
+  color: white;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  font-size: 1.2rem;
+}
+
+.main-container {
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.bookmark-section {
+  margin-bottom: 2rem;
+}
+
+.bookmark-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #3e4eb8;
+}
+
+.bookmark-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.bookmark-card {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.bookmark-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.bookmark-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.bookmark-card p {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-actions button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.card-actions button:hover {
+  opacity: 0.9;
+}
+
+.card-actions .reading-btn {
+  background-color: #ffa41b;
+  color: white;
+}
+
+.card-actions .finished-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.card-actions .reset-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Your Bookmarks</h1>
+    <p>Manage and track your reading journey.</p>
+  </header>
+
+  <main class="main-container">
+    <!-- Unread Section -->
+    <section class="bookmark-section">
+      <h2>Unread</h2>
+      <div id="unread" class="bookmark-grid">
+        <!-- Cards will be dynamically inserted here -->
+      </div>
+    </section>
+
+    <!-- Reading Section -->
+    <section class="bookmark-section">
+      <h2>Reading</h2>
+      <div id="reading" class="bookmark-grid">
+        <!-- Cards will be dynamically inserted here -->
+      </div>
+    </section>
+
+    <!-- Finished Section -->
+    <section class="bookmark-section">
+      <h2>Finished</h2>
+      <div id="finished" class="bookmark-grid">
+        <!-- Cards will be dynamically inserted here -->
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Helper function to fetch bookmarks by status
+async function fetchBookmarks() {
+  try {
+    const response = await fetch('/bookmarks', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`, // Assuming JWT token is stored here
+      },
+    });
+
+    if (!response.ok) throw new Error('Failed to fetch bookmarks.');
+
+    const bookmarks = await response.json();
+
+    // Categorize bookmarks
+    const categorized = {
+      UNREAD: [],
+      READING: [],
+      FINISHED: [],
+    };
+
+    bookmarks.forEach((bookmark) => {
+      categorized[bookmark.status].push(bookmark);
+    });
+
+    renderBookmarks(categorized);
+  } catch (error) {
+    console.error('Error fetching bookmarks:', error);
+  }
+}
+
+// Helper function to render bookmarks
+function renderBookmarks(categorizedBookmarks) {
+  const sections = {
+    UNREAD: document.getElementById('unread'),
+    READING: document.getElementById('reading'),
+    FINISHED: document.getElementById('finished'),
+  };
+
+  Object.keys(sections).forEach((status) => {
+    const section = sections[status];
+    section.innerHTML = ''; // Clear existing content
+
+    categorizedBookmarks[status].forEach((bookmark) => {
+      const card = document.createElement('div');
+      card.className = 'bookmark-card';
+
+      // <img src="${bookmark.resource.imageUrl || 'default.jpg'}" alt="${bookmark.resource.title}">
+      card.innerHTML = `
+        
+        <h3>${bookmark.resource.title}</h3>
+        <p>${bookmark.resource.description || 'No description available.'}</p>
+        <div class="card-actions">
+          ${status !== 'UNREAD' ? `<button class="reset-btn" data-id="${bookmark.id}">Unread</button>` : ''}
+          ${status !== 'READING' ? `<button class="reading-btn" data-id="${bookmark.id}">Reading</button>` : ''}
+          ${status !== 'FINISHED' ? `<button class="finished-btn" data-id="${bookmark.id}">Finished</button>` : ''}
+          <button class="delete-btn" data-id="${bookmark.id}">Delete</button>
+        </div>
+      `;
+
+      section.appendChild(card);
+    });
+  });
+
+  addEventListeners();
+}
+
+// Helper function to update bookmark status
+async function updateBookmarkStatus(id, status) {
+  try {
+    const response = await fetch(`/bookmarks/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    if (!response.ok) throw new Error('Failed to update bookmark status.');
+
+    await fetchBookmarks(); // Refresh bookmarks
+  } catch (error) {
+    console.error('Error updating bookmark status:', error);
+  }
+}
+
+// Helper function to delete a bookmark
+async function deleteBookmark(id) {
+  try {
+    const response = await fetch(`/bookmarks/${id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    if (!response.ok) throw new Error('Failed to delete bookmark.');
+
+    await fetchBookmarks(); // Refresh bookmarks
+  } catch (error) {
+    console.error('Error deleting bookmark:', error);
+  }
+}
+
+// Add event listeners to dynamically generated buttons
+function addEventListeners() {
+  document.querySelectorAll('.reading-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-id');
+      updateBookmarkStatus(id, 'READING');
+    });
+  });
+
+  document.querySelectorAll('.finished-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-id');
+      updateBookmarkStatus(id, 'FINISHED');
+    });
+  });
+
+  document.querySelectorAll('.reset-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-id');
+      updateBookmarkStatus(id, 'UNREAD');
+    });
+  });
+
+  document.querySelectorAll('.delete-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-id');
+      deleteBookmark(id);
+    });
+  });
+}
+
+// Initialize the application
+fetchBookmarks();
+
+  </script>
+
+  <!-- <script src="script.js"></script> -->
+</body>
+</html>

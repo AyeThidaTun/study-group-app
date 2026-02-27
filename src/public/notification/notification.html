@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+    <link href="styles.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .tab-content {
+            margin-top: 20px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .btn-custom {
+            background-color: #deb183 !important;
+            color: black;
+            border: none;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #deb183 !important;
+            color: black !important;
+        }
+
+        .nav-tabs .nav-link {
+            color: #333 !important;
+        }
+
+        .form-control {
+            max-width: 500px;
+            /* Set a fixed maximum width */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-container" class="mb-3"></div>
+    <div class="container">
+        <h2 class="text-center mb-4 h1 title col-12">Notifications</h2>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="studyGroupTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="all-groups-tab" data-bs-toggle="tab" data-bs-target="#all-groups"
+                    type="button" role="tab">Announcements</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="joined-groups-tab" data-bs-toggle="tab" data-bs-target="#joined-groups"
+                    type="button" role="tab">Personal Notifications</button>
+            </li>
+        </ul>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div>
+                <button class="btn btn-secondary" id="applyFilterBtn">Filter</button>
+                <div id="filterOptions" class="d-none">
+                    <label>
+                        <input type="checkbox" id="filterRead" value="READ"> Read
+                    </label>
+                    <label>
+                        <input type="checkbox" id="filterUnread" value="UNREAD"> Unread
+                    </label>
+                </div>
+            </div>
+            <select class="form-select w-auto" id="sortOptions">
+                <option value="all">Sort by</option>
+                <option value="READ">Read</option>
+                <option value="UNREAD">Unread</option>
+                <option value="DATEDESC">Newest</option>
+                <option value="DATEASC">Oldest</option>
+            </select>
+        </div>
+
+        <div class="tab-content">
+            <!-- Announcements Tab -->
+            <div class="tab-pane fade show active" id="all-groups" role="tabpanel" aria-labelledby="all-groups-tab">
+                <div id="announcementsContainer" class="row g-3 mt-4 m-3 mb-5">
+                    <!-- Announcements will be dynamically populated here -->
+                </div>
+            </div>
+            <!-- Personal Notifications Tab -->
+            <div class="tab-pane fade" id="joined-groups" role="tabpanel" aria-labelledby="joined-groups-tab">
+                <div id="personalNotificationsContainer" class="row g-3 mt-4 m-3 mb-5">
+                    <!-- Personal notifications will be dynamically populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Large modal -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Notification Title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Notification content goes here -->
+                </div>
+                <div class="modal-footer" id="modalFooter">
+                    <!-- Footer buttons go here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="notification.js"></script>
+    <script>
+        // Function to load the navbar into the page
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+        });
+    </script>
+</body>
+
+</html>

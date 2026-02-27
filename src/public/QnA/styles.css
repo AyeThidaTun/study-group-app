@@ -1,0 +1,260 @@
+/*=============== GOOGLE FONTS ===============*/
+@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@700&display=swap");
+@import url('https://fonts.cdnfonts.com/css/black-ops-one');
+@import url('https://fonts.googleapis.com/css?family=Nunito:400,700');
+
+/* General Body Styling */
+body {
+  font-family: "Nunito", sans-serif;
+  background: linear-gradient(to right, #ccd5ae, #fefae0);
+  color: #333;
+  font-size: 16px;
+}
+
+/* Welcome Section */
+.welcome-section {
+  background: linear-gradient(135deg, #00838d, #6becb7);
+  color: white;
+  padding: 40px 20px;
+  border-radius: 15px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.welcome-title {
+  font-family: sans-serif;
+  font-size: 2.8rem;
+  font-weight: bold;
+  color: #fefae0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-text {
+  font-size: 1.2rem;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  color: #faedcd;
+}
+
+.welcome-image {
+  max-width: 70%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Main Container */
+.main-container {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Question Form */
+#question-form {
+  background: linear-gradient(to bottom, #fefae0, #ccd5ae);
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px solid #ddd;
+}
+
+#h2 {
+  font-family: 'Black Ops One', sans-serif;
+  color: #d4a373;
+  margin-bottom: 15px;
+}
+
+.form-control {
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Edit Button Styling */
+.btn-warning {
+  background: #ffecb3 !important; /* Light yellow background */
+  color: black !important; /* Black text */
+  border: 2px solid #ffd54f !important; /* Yellow border */
+  transition: all 0.3s ease !important; /* Smooth transition */
+}
+
+.btn-warning:hover {
+  background: #ffd54f !important; /* Slightly darker yellow on hover */
+  color: black !important; /* Black text remains */
+  transform: scale(1.05) !important; /* Scale on hover */
+}
+
+/* Delete Button Styling */
+.btn-danger {
+  background: #d32f2f !important;  /* Red background */
+  color: white !important; /* White text */
+  border: none !important; /* No border */
+  transition: all 0.3s ease !important; /* Smooth transition */
+}
+
+.btn-danger:hover {
+  background: #b71c1c !important; /* Darker red on hover */
+  color: white !important; /* White text remains */
+  transform: scale(1.05) !important; /* Scale on hover */
+}
+
+/* Sort Options */
+.sort-options h3 {
+  font-family: 'Adlam Display', sans-serif;
+  color: #00838d;
+}
+
+.advanced-search h3 {
+  font-family: 'Adlam Display', sans-serif;
+  color: #00838d;
+}
+
+.sort-options select {
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sort-options .btn-warning {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Questions and Answers */
+.question, .answer {
+  background: #fefae0;
+  padding: 20px;
+  margin: 15px 0;
+  border-radius: 15px;
+  position: relative;
+  border: 1px solid #ddd;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+}
+
+.metadata {
+  font-size: 0.9rem;
+  color: #777;
+  margin-top: 10px;
+}
+
+.updated-tag {
+  font-size: 0.9rem;
+  color: #d4a373;
+  font-weight: bold;
+}
+
+.heart-icon.red {
+  color: #d4a373;
+}
+
+.fa-heart.red {
+  color: #d4a373;
+}
+
+.heart-icon:hover {
+  transform: scale(1.2);
+  transition: transform 0.2s;
+}
+
+.image-container {
+  width: 100%;
+  max-height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.uploaded-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Question Actions Styling */
+.question-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  text-align: right;
+}
+
+.question-actions button {
+  font-family: 'Nunito', sans-serif;
+  background-color: #00838d;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.question-actions button:hover {
+  background-color: #d4a373;
+  color: #ffffff;
+}
+
+/* Badge Styling */
+.badge {
+  font-size: 0.9rem;
+  padding: 0.4em 0.6em;
+  margin-right: 0.5em;
+}
+
+.badge.bg-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.badge.bg-secondary {
+  background-color: #ccd5ae;
+  color: white;
+}
+
+/* Modal Styling */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-dialog {
+  margin: 10% auto;
+  max-width: 800px;
+}
+
+.modal-content {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  background-color: #00838d;
+  color: white;
+  font-family: 'Montserrat Alternates', sans-serif;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  background-color: #fefae0;
+}
+
+.modal-footer {
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: flex-end;
+}

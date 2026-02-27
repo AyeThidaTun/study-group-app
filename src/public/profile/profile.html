@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="../main.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navbar will be injected here -->
+    <div id="navbar-container"></div>
+    <div class="container mt-4">
+        <div id="profile-container" class="row g-4 mb-5 pb-5">
+            <!-- Profile information will be dynamically injected here -->
+        </div>
+    </div>
+
+    <!-- Display Avatar Options Modal -->
+    <div class="modal fade" id="avatarModal" tabindex="-1" role="dialog" aria-labelledby="avatarModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-black" id="avatarModalLabel">Choose Avatar</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Avatar images will be dynamically injected here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="save-avatar-btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Update Profile Modal -->
+    <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateModalLabel">Update Field</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3" id="updateFieldContainer">
+                        <label for="updateInput" class="form-label">New Value</label>
+                        <!-- Text Input for fields other than Academic Level -->
+                        <input type="text" class="form-control" id="updateInput">
+                        <small id="infoText" class="text-danger"></small>
+
+                        <!-- Radio buttons for Academic Level -->
+                        <div id="academicLevelRadio" class="d-none">
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="pfp" name="academicLevel" value="PFP">
+                                <label class="form-check-label" for="pfp">PFP</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="year1" name="academicLevel"
+                                    value="Year 1">
+                                <label class="form-check-label" for="year1">Year 1</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="year2" name="academicLevel"
+                                    value="Year 2">
+                                <label class="form-check-label" for="year2">Year 2</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="year3" name="academicLevel"
+                                    value="Year 3">
+                                <label class="form-check-label" for="year3">Year 3</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="alumni" name="academicLevel"
+                                    value="Alumni">
+                                <label class="form-check-label" for="alumni">Alumni</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveChangesButton">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- General Alert Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered alertModal">
+            <div class="modal-content custom-popover">
+                <div class="modal-header custom-popover">
+                    <h5 class="modal-title" id="alertModalLabel">Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body custom-popover" id="alertModalBody">
+                    <!-- Alert content will be dynamically inserted here -->
+                </div>
+                <div class="modal-footer custom-popover">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verify Old Password Modal -->
+<div class="modal fade" id="verifyPasswordModal" aria-hidden="true" aria-labelledby="verifyPasswordModalLabel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="verifyPasswordModalLabel">Verify Old Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="oldPasswordInput">Enter Old Password</label>
+                <input type="password" class="form-control" id="oldPasswordInput" placeholder="Old Password">
+                <small id="oldPasswordError" class="text-danger"></small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="verifyPasswordButton" onclick="verifyOldPassword()">Verify</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- New Password Update Modal -->
+<div class="modal fade" id="newPasswordModal" aria-hidden="true" aria-labelledby="newPasswordModalLabel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newPasswordModalLabel">Update Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="newPasswordInput">Enter New Password</label>
+                <input type="password" class="form-control" id="newPasswordInput" placeholder="New Password">
+                <label for="confirmPasswordInput" class="mt-2">Confirm New Password</label>
+                <input type="password" class="form-control" id="confirmPasswordInput" placeholder="Confirm New Password">
+                <small id="passwordError" class="text-danger"></small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="updatePasswordButton" onclick="updatePassword()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    <!-- Delete Profile Button -->
+    <div class="container mt-4">
+        <button class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteProfileModal">Delete
+            Profile</button>
+    </div>
+
+    <!-- Delete Profile Modal -->
+    <div class="modal fade" id="deleteProfileModal" tabindex="-1" aria-labelledby="deleteProfileModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="deleteProfileModalLabel">Delete Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete your profile? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteButton">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <script src="../auth.js"></script>
+    <script src="retrieve.js"></script>
+    <script src="update.js"></script>
+    <script src="delete.js"></script>
+</body>
+
+</html>

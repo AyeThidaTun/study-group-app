@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Tutors - Weekly Calendar</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .calendar-container {
+      display: grid;
+      grid-template-columns: 100px repeat(7, 1fr); /* First column for time slots */
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      border-collapse: collapse;
+    }
+
+    .time-slot, .day-slot {
+      border: 1px solid #ddd;
+      min-height: 50px;
+      position: relative;
+    }
+
+    .time-slot {
+      background-color: #f1f1f1;
+      text-align: center;
+      font-size: 12px;
+      line-height: 50px;
+    }
+
+    .day-slot {
+      vertical-align: top;
+      padding: 2px;
+      background-color: #fff;
+    }
+
+    .booking-card {
+      position: absolute;
+      background-color: #cfe2ff;
+      color: #084298;
+      border-radius: 4px;
+      padding: 5px;
+      font-size: 0.9em;
+      overflow: hidden;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .booking-card p {
+      margin: 0;
+      font-size: 12px;
+    }
+
+    .day-header {
+      grid-column: span 8; /* Include the time slot column */
+      display: grid;
+      grid-template-columns: 100px repeat(7, 1fr); /* Align with the time slot and days */
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .day-header div {
+      border: 1px solid #ddd;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar-container"></div>
+
+
+
+  <div class="container mt-5">
+    <h1>Your Weekly Calendar</h1>
+    <div class="calendar-container" id="calendar">
+      <!-- Time and days grid will be dynamically populated here -->
+    </div>
+
+
+  <script>
+
+    const token = localStorage.getItem('token'); // JWT token
+
+    const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    const timeSlots = [
+      "6:00 AM", "7:00 AM", "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+      "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM",
+      "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM", "12:00 AM"
+    ];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const response = await fetch(`/tutor/your-tutors`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch tutors');
+
+        const tutors = await response.json();
+        displayCalendar(tutors);
+      } catch (error) {
+        console.error('Error fetching tutors:', error);
+        alert('Failed to load your tutors.');
+      }
+    });
+
+    function displayCalendar(tutors) {
+      const calendar = document.getElementById('calendar');
+
+      // Add the day headers
+      calendar.innerHTML += `
+        <div class="day-header">
+          <div>Time</div>
+          ${daysOfWeek.map(day => `<div>${day}</div>`).join('')}
+        </div>`;
+
+      // Populate the grid with time slots and day slots
+      timeSlots.forEach(time => {
+        calendar.innerHTML += `
+          <div class="time-slot">${time}</div>
+          ${daysOfWeek.map(() => `<div class="day-slot"></div>`).join('')}
+        `;
+      });
+
+      // Add bookings
+      tutors.forEach(tutor => {
+        if (!tutor.bookings) return;
+
+        tutor.bookings
+          .filter(booking => booking.status.toLowerCase() === 'approved')
+          .forEach(booking => {
+            // Use the `day` field directly from the booking
+            const dayIndex = daysOfWeek.indexOf(booking.day);
+
+            // Format start and end times
+            const formatTime = (time) => {
+              const timeParts = time.split(':');
+              const hours = parseInt(timeParts[0], 10);
+              const minutes = timeParts[1];
+              const ampm = hours >= 12 ? 'PM' : 'AM';
+              return `${hours % 12 || 12}:${minutes} ${ampm}`;
+            };
+
+            const formattedStartTime = formatTime(booking.startTime);
+            const formattedEndTime = formatTime(booking.endTime);
+
+            // Find the index of the time slot
+            const startTimeIndex = timeSlots.findIndex(slot => slot === formattedStartTime);
+            const endTimeIndex = timeSlots.findIndex(slot => slot === formattedEndTime);
+
+            if (dayIndex !== -1 && startTimeIndex !== -1) {
+              const daySlots = document.querySelectorAll('.day-slot');
+              const slotIndex = dayIndex + startTimeIndex * 7;
+              const durationSlots = endTimeIndex - startTimeIndex;
+
+              const slot = daySlots[slotIndex];
+              if (slot) {
+                const bookingCard = document.createElement('div');
+                bookingCard.classList.add('booking-card');
+                bookingCard.style.top = "2px"; 
+                bookingCard.style.left = "2px";
+                bookingCard.style.width = "calc(100% - 4px)";
+                bookingCard.style.height = `calc(${durationSlots} * 50px - 4px)`;
+                bookingCard.innerHTML = `
+                  <p><strong>${tutor.name}</strong></p>
+                  <p>${formattedStartTime} - ${formattedEndTime}</p>
+                `;
+
+                slot.appendChild(bookingCard);
+              }
+            }
+          });
+      });
+    }
+    function displayAdditionalStatuses(tutors) {
+    // Format start and end times
+    const formatTime = (time) => {
+        const timeParts = time.split(':');
+        const hours = parseInt(timeParts[0], 10);
+        const minutes = timeParts[1];
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        return `${hours % 12 || 12}:${minutes} ${ampm}`;
+    };
+
+    // Create main container
+    const container = document.createElement('div');
+    container.classList.add('container', 'mt-4');
+
+    // Create section headings and rows
+    const sections = {
+        cancelled: { title: "Cancelled", row: document.createElement('div'), hasBookings: false },
+        pending: { title: "Pending", row: document.createElement('div'), hasBookings: false },
+        approved: { title: "Approved", row: document.createElement('div'), hasBookings: false },
+        completed: { title: "Completed", row: document.createElement('div'), hasBookings: false } // ✅ Added Completed Section
+    };
+
+    Object.keys(sections).forEach(status => {
+        sections[status].row.classList.add('row'); // Bootstrap row for cards
+        const sectionDiv = document.createElement('div');
+        sectionDiv.innerHTML = `<h2 class="mt-4">${sections[status].title}</h2>`;
+        sectionDiv.appendChild(sections[status].row);
+        container.appendChild(sectionDiv);
+    });
+
+    // Loop through tutors and add cards to the correct section
+    tutors.forEach(tutor => {
+
+        if (!tutor.bookings) return;
+
+        tutor.bookings.forEach(booking => {
+          console.log("bookings", booking);
+            const statusKey = booking.status.toLowerCase();
+            if (!sections[statusKey]) return;
+
+            const card = document.createElement('div');
+            card.classList.add('col-md-4', 'mb-3'); // 3 cards per row
+            card.innerHTML = `
+                <div class="card" style="border-left: 5px solid ${getStatusColor(booking.status)}">
+                    <div class="card-body">
+                        <h5 class="card-title">${tutor.name}</h5>
+                        <p class="card-text"><strong>Status:</strong> 
+                            <span style="color: ${getStatusColor(booking.status)}">${booking.status}</span>
+                        </p>
+                        <p class="card-text"><strong>Day:</strong> ${booking.day}</p>
+                        <p class="card-text"><strong>Time:</strong> ${formatTime(booking.startTime)} - ${formatTime(booking.endTime)}</p>
+                    </div>
+                </div>
+            `;
+
+            // If booking is "Completed", add the "Extend" button
+            if (statusKey === 'completed') {
+                const extendButton = document.createElement('button');
+                extendButton.classList.add('btn', 'btn-primary', 'mt-2');
+                extendButton.textContent = 'Extend';
+                extendButton.onclick = () => {
+                    const months = prompt('Enter number of months to extend (minimum 1):', '1');
+                    if (months && parseInt(months) >= 1) {
+                      console.log("booking id is", booking.id);
+                        extendBooking(booking.id, parseInt(months));
+                      
+                    } else {
+                        alert('Invalid duration. Please enter at least 1 month.');
+                    }
+                };
+
+                card.querySelector('.card-body').appendChild(extendButton);
+            }
+
+             // If booking is "Approved", add the "Complete" button
+             if (statusKey === 'approved') {
+                const completeButton = document.createElement('button');
+                completeButton.classList.add('btn', 'btn-success', 'mt-2');
+                completeButton.textContent = 'Mark Completed';
+                completeButton.onclick = () => {
+                    // Call the API to mark the booking as completed
+                    markBookingComplete(booking.id);
+                };
+
+                card.querySelector('.card-body').appendChild(completeButton);
+            }
+
+            sections[statusKey].row.appendChild(card);
+            sections[statusKey].hasBookings = true; // Mark that this section has bookings
+        });
+    });
+
+    // Check for empty sections and display "No bookings for this section"
+    Object.keys(sections).forEach(status => {
+        if (!sections[status].hasBookings) {
+            const emptyMessage = document.createElement('p');
+            emptyMessage.classList.add('text-muted', 'mt-2');
+            emptyMessage.innerText = "No bookings for this section.";
+            sections[status].row.appendChild(emptyMessage);
+        }
+    });
+
+    // Append everything to the body
+    document.body.appendChild(container);
+}
+
+
+
+
+  function formatTime(time) {
+    const timeParts = time.split(':');
+    const hours = parseInt(timeParts[0], 10);
+    const minutes = timeParts[1];
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    return `${hours % 12 || 12}:${minutes} ${ampm}`;
+  }
+
+
+
+function getStatusColor(status) {
+  switch (status.toLowerCase()) {
+    case 'pending': return 'orange';
+    case 'cancelled': return 'red';
+    case 'completed': return 'green';
+    default: return 'gray';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const response = await fetch(`/tutor/your-tutors`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+
+    if (!response.ok) throw new Error('Failed to fetch tutors');
+
+    const tutors = await response.json();
+    displayAdditionalStatuses(tutors);
+  } catch (error) {
+    console.error('Error fetching tutors:', error);
+    alert('Failed to load your tutors.');
+  }
+});
+
+
+async function extendBooking(bookingId, months) {
+  try {
+    const response = await fetch(`/tutor/extend/${bookingId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}` // If using auth
+      },
+      body: JSON.stringify({ durationMonths: months }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      alert('Booking extended successfully!');
+      window.location.reload(); // Refresh the page to show the updated booking
+    } else {
+      alert(`Error: ${data.error}`);
+    }
+  } catch (error) {
+    console.error('Error extending booking:', error);
+    alert('Failed to extend booking.');
+  }
+}
+
+
+// API call to mark the booking as complete
+async function markBookingComplete(bookingId) {
+    try {
+        const response = await fetch(`/tutor/mark-booking-complete/${bookingId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('Booking marked as completed!');
+            // Optionally, you can refresh the page or update the UI to reflect the status change
+            location.reload(); // Reload the page to see the updated status
+        } else {
+            alert('Error marking booking as completed: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error marking booking as completed:', error);
+        alert('Failed to mark the booking as completed.');
+    }
+}
+
+
+    window.addEventListener('DOMContentLoaded', function () {
+      fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+    });
+  </script>
+</body>
+</html>

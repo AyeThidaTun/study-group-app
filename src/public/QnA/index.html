@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Q&A</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navbar will be injected here -->
+  <div id="navbar-container"></div>
+  <!-- Welcome Section -->
+  <section class="welcome-section">
+    <div class="container text-center">
+      <h1 class="welcome-title">Welcome to the Q&A Hub!</h1>
+      <h6 class="welcome-text">
+        A place to ask, learn, and share knowledge. Let's solve problems together!
+      </h6>
+      <img src="../images/Qna_banner.png" alt="Q&A Banner" class="welcome-image" />
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <div class="container main-container">
+
+    <!-- Saved Questions Button -->
+  <div class="mb-4">
+    <button onclick="redirectToSavedQuestions()" class="btn btn-warning">
+      <i class="fa fa-bookmark"></i> Saved Questions
+    </button>
+  </div>
+
+  <!-- Question Form -->
+  <div id="question-form" class="mb-4">
+    <h2><i class="fa fa-question-circle"></i> Ask a Question</h2>
+    <input type="text" id="question-title" placeholder="Question Title" class="form-control my-2" required />
+    <textarea id="question-content" placeholder="Question Content" class="form-control my-2" required></textarea>
+
+    <!-- School and Module Selection -->
+    <div class="row mb-2">
+      <div class="col-md-6">
+        <select id="school-dropdown" class="form-select my-2" required>
+          <option value="">Select School</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <select id="module-dropdown" class="form-select my-2" required disabled>
+          <option value="">Select Module</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="document-upload" class="form-label">Upload Document (PDF, DOC, Image):</label>
+    <input type="file" id="document-upload" class="form-control my-2" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+    
+    <button onclick="submitQuestion()" class="btn btn-warning btn-lg"><i class="fa fa-paper-plane"></i> Post Question</button>
+  </div>
+
+
+    <!-- Advanced Search Section -->
+    <div class="advanced-search mb-4">
+      <h3><i class="fa fa-search"></i> Advanced Search</h3>
+      <div class="row">
+        <!-- Search Field -->
+        <div class="col-md-4 mb-2">
+          <input id="search-input" type="text" class="form-control" placeholder="Search by Title/Content">
+        </div>
+        <!-- School Dropdown -->
+        <div class="col-md-3 mb-2">
+          <select id="school-filter" class="form-select">
+            <option value="">-- Select School --</option>
+          </select>
+        </div>
+        <!-- Module Dropdown -->
+        <div class="col-md-3 mb-2">
+          <select id="module-filter" class="form-select">
+            <option value="">-- Select Module --</option>
+          </select>
+        </div>
+        <!-- Status Filter -->
+        <div class="col-md-2 mb-2">
+          <select id="status-filter" class="form-select">
+            <option value="ACTIVE,SOLVED">Active & Solved</option>
+            <option value="ACTIVE">Active</option>
+            <option value="SOLVED">Solved</option>
+            <option value="ARCHIVED">Archived</option>
+          </select>
+        </div>
+      </div>
+      <button onclick="loadQuestions()" class="btn btn-warning mt-2">
+        <i class="fa fa-filter"></i> Search
+      </button>
+    </div>
+
+
+
+    <!-- Sort Questions -->
+    <div class="sort-options mb-4">
+      <h3><i class="fa fa-sort"></i> Sort Questions</h3>
+      <div class="d-flex align-items-center">
+        <select id="sort-by" class="form-select w-auto me-2">
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+          <option value="most-popular">Most Popular</option>
+          <option value="least-popular">Least Popular</option>
+        </select>
+        <button onclick="loadQuestions()" class="btn btn-warning"><i class="fa fa-refresh"></i> Sort</button>
+      </div>
+    </div>
+
+    <!-- Container for Questions and Answers -->
+    <div id="questions-container"></div>
+  </div>
+
+  <!-- Modal for Editing Question -->
+  <div id="editQuestionModal" class="modal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header bg-warning text-white">
+          <h5 class="modal-title"><i class="fa fa-edit"></i> Edit Your Question</h5>
+          <button type="button" class="btn-close" onclick="closeEditModal()"></button>
+        </div>
+        <!-- Modal Body -->
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="edit-question-title" class="form-label"><strong>Question Title</strong></label>
+            <input type="text" id="edit-question-title" class="form-control" placeholder="Enter your question title here" />
+          </div>
+          <div class="mb-3">
+            <label for="edit-question-content" class="form-label"><strong>Question Content</strong></label>
+            <textarea id="edit-question-content" class="form-control" placeholder="Enter your question content here" rows="5"></textarea>
+          </div>
+        </div>
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+          <button id="save-edited-question" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
+          <button type="button" class="btn btn-secondary" onclick="closeEditModal()"><i class="fa fa-times"></i> Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <script> 
+    // Load navbar from navbar.html
+    fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+
+    // Redirect to savedQuestions.html
+    function redirectToSavedQuestions() {
+    window.location.href = 'QnA/savedQuestions.html';
+  }
+  </script>
+  <script src="scripts.js"></script>
+</body>
+</html>

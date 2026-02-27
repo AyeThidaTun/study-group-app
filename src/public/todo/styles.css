@@ -1,0 +1,95 @@
+body {
+  font-family: 'Sour Gummy', serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+.heading h1 {
+  font-size: 3rem;
+  color: #cd9b62;
+}
+
+#filterAndSort h2, h3 {
+  color: #8c6e47;
+}
+
+#taskCreation h2 {
+  color: #8c6e47;
+}
+
+#filterAndSort {
+  background-color: #fdf4d7;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#taskBoard {
+  margin-top: 30px;
+}
+
+.task-column {
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.list-group-item {
+  border: none;
+  background-color: #f9f9f9;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+}
+
+.list-group-item:hover {
+  background-color: #fdf4d7;
+  color: #0b0000;
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+#taskCreation form input, #taskCreation form select, #taskCreation form textarea {
+  border-radius: 10px;
+  border: 2px solid #cd9b62;
+}
+
+#taskCreation form input:focus, #taskCreation form select:focus, #taskCreation form textarea:focus {
+  border-color: #8c6e47;
+  box-shadow: 0 0 10px rgba(140, 110, 71, 0.3);
+}
+
+.task-column h3 {
+  font-size: 1.5rem;
+  text-transform: uppercase;
+}
+
+.task-column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.task-card {
+  transition: transform 0.2s;
+  border-radius: 15px;
+}
+
+.task-card:hover {
+  transform: translateY(-5px);
+}
+
+.status-badge {
+  font-size: 0.9rem;
+  padding: 0.5em 1em;
+}
+
+.member-select-card {
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.member-select-card.selected {
+  border-color: #0d6efd;
+}

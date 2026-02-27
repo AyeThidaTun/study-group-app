@@ -1,0 +1,87 @@
+@import url('https://fonts.cdnfonts.com/css/adlam-display');
+
+body {
+    margin: 0 5%;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+header {
+    background-color: darkcyan;
+    padding: 20px;
+    height: 2%;
+}
+
+header a {
+    color: white;
+    text-decoration: none;
+    margin: 0 20px;
+}
+
+header a:hover {
+    text-decoration: underline;
+}
+
+section {
+    width: 100%;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+fieldset {
+    display: flex;
+    border: none;
+}
+
+fieldset p {
+    display: flex;
+    flex-direction: column;
+    margin: 0 5px;
+}
+
+.btn-outline-brown {
+    border-color: #d4a373 !important;
+    color: #d4a373 !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-brown:hover {
+    background-color: #d4a373 !important;
+    color: white !important;
+}
+
+/* Custom Modal Styling */
+.modal-content.custom-popover {
+    border-color: var(--bs-popover-border-color, #6f42c1); /* Example: Violet border */
+    background-color: var(--bs-popover-header-bg, #6f42c1); /* Background color */
+    color: var(--bs-popover-header-color, #fff); /* Text color */
+}
+
+.modal-header.custom-popover {
+    background-color: var(--bs-popover-header-bg, #6f42c1);
+    color: var(--bs-popover-header-color, #fff);
+}
+
+.modal-footer.custom-popover {
+    border-top: 1px solid var(--bs-popover-border-color, #6f42c1);
+}
+
+.modal-body.custom-popover {
+    padding: var(--bs-popover-body-padding-y, 0.5rem) var(--bs-popover-body-padding-x, 1rem);
+}
+
+
+#alertModal {
+    z-index: 1060 !important; /* Higher than other modals and backdrops */
+}
+
+.modal-backdrop.alert-backdrop {
+    z-index: 1055 !important; /* Place the backdrop just below the alert modal */
+}
+
+.title,h4 {
+    font-family: 'Adlam Display', sans-serif;
+    color: #d4a373;
+}

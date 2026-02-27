@@ -1,0 +1,69 @@
+/* 
+
+    Name: Isaac Kwok
+    Admin No: p2317665
+    Class: DIT1B09
+	
+*/
+
+
+/*=============== GOOGLE FONTS ===============*/
+@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@700&display=swap");
+/*=============== Font for Item Names ===============*/
+@import url('https://fonts.cdnfonts.com/css/black-ops-one');
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/*=============== Font for Titles ===============*/
+@import url('https://fonts.cdnfonts.com/css/black-side');
+/*=============== Font for Subsequent Buttons ===============*/
+@import url('https://fonts.cdnfonts.com/css/adlam-display');
+/*=============== Font for Move Names ===============*/
+@import url('https://fonts.cdnfonts.com/css/bluesky-2');
+/*=============== Font for Combat Turn Outcome ===============*/
+@import url('https://fonts.cdnfonts.com/css/adlam-display');
+/*=============== Font for Game Name ===============*/
+@import url('https://fonts.cdnfonts.com/css/skwirl');
+
+
+/* Styling for user count display */
+.userCount-container {
+    background-color: #fefae0; 
+    border-radius: 15px;
+    padding: 20px;
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    font-family: 'Adlam Display', sans-serif;
+    color: #d4a373;
+}
+
+.userCount-number {
+    font-family: 'Black Ops One', sans-serif;
+    color: #d4a373; 
+}
+
+.container {
+    width: 70% !important;
+}
+
+.btn-outline-brown {
+    border-color: #d4a373 !important;
+    color: #d4a373 !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-brown:hover {
+    background-color: #d4a373 !important;
+    color: white !important;
+}
+
+.brand{
+    color: #ccd5ae;
+    color: #e9edc9;
+    color: #fefae0;
+    color: #faedcd;
+    color: #d4a373;
+}

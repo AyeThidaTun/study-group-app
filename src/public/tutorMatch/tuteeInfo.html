@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Tutees</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f9f9f9; }
+    .container { max-width: 1200px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 8px; }
+    .tutee-card { background: #cfe2ff; color: #084298; padding: 15px; border-radius: 4px; margin: 10px 0; }
+    .slot { margin-top: 10px; }
+    .slot-details { background: #e7f1ff; padding: 5px; border-radius: 4px; display: none; }
+    .nav-tabs .nav-link.active { background-color: #007bff; color: #fff; }
+    .toggle-btn { cursor: pointer; color: #007bff; border: none; background: none; }
+    .rounded-button {
+    border-radius: 25px; /* Add rounded corners */
+    margin-right: 10px;  /* Space between buttons */
+  }
+
+  /* To ensure the buttons stay on the same line */
+  .btn-container {
+    display: flex; /* Flexbox for horizontal alignment */
+    align-items: center; /* Vertically center the buttons */
+  }
+  </style>
+</head>
+<body>
+   <!-- Navbar -->
+ <div id="navbar-container"></div>
+
+  <div class="container">
+    <h1>Your Tutees 123</h1>
+    
+    <!-- Tabs for Approved, Pending, Completed, and Cancelled -->
+    <ul class="nav nav-tabs mt-4" id="tuteesTabs">
+      <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#approved">Approved</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#pending">Pending</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#completed">Completed</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#cancelled">Cancelled</a></li>
+    </ul>
+
+    <div class="tab-content mt-3">
+      <!-- Approved Tutees Card View -->
+      <div id="approved" class="tab-pane fade show active">
+        <div class="row" id="approvedTutees"></div>
+      </div>
+      
+      <!-- Pending Tutees Cards -->
+      <div id="pending" class="tab-pane fade">
+        <div class="row" id="pendingTutees"></div>
+      </div>
+      
+      <!-- Completed Tutees Table -->
+      <div id="completed" class="tab-pane fade">
+        <table class="table" id="completedTable"></table>
+      </div>
+      
+      <!-- Cancelled Tutees Table -->
+      <div id="cancelled" class="tab-pane fade">
+        <table class="table" id="cancelledTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+
+
+function formatTime(time) {
+      return time.slice(0, 5);
+    }
+
+    function formatDate(dateString) {
+      return dateString.split('T')[0];
+    }
+
+    async function fetchTutees() {
+      try {
+        const response = await fetch(`/tutor/myTutees/${localStorage.getItem('userId')}`);
+        const tutees = await response.json();
+        
+        console.log('Fetched Tutees:', tutees);  // Log the fetched data for debugging
+        
+        return tutees;
+      } catch (error) {
+        console.error('Error fetching tutees:', error);
+        return [];
+      }
+    }
+
+    function groupTuteesByName(tutees) {
+      // Group tutees by their name
+      const grouped = {};
+      
+      tutees.forEach(tutee => {
+        if (!grouped[tutee.tuteeName]) {
+          grouped[tutee.tuteeName] = [];
+        }
+        grouped[tutee.tuteeName].push(tutee);
+      });
+      
+      return grouped;
+    }
+
+    function displayTutees(tutees) {
+      const approvedContainer = document.getElementById('approvedTutees');
+      const pendingContainer = document.getElementById('pendingTutees');
+      const completedTable = document.getElementById('completedTable');
+      const cancelledTable = document.getElementById('cancelledTable');
+
+      // Clear existing data
+      approvedContainer.innerHTML = pendingContainer.innerHTML = completedTable.innerHTML = cancelledTable.innerHTML = '';
+
+      const groupedTutees = groupTuteesByName(tutees);  // Group by name
+
+      // Add table headers for Completed and Cancelled sections
+completedTable.innerHTML = `
+  <thead>
+    <tr>
+      <th>Tutee Name</th>
+      <th>Subject</th>
+      <th>Day</th>
+      <th>Time Slot</th>
+      <th>Start Date</th>
+      <th>End Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Rows will be inserted here dynamically -->
+  </tbody>
+`;
+
+cancelledTable.innerHTML = `
+  <thead>
+    <tr>
+      <th>Tutee Name</th>
+      <th>Subject</th>
+      <th>Day</th>
+      <th>Time Slot</th>
+      <th>Start Date</th>
+      <th>End Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Rows will be inserted here dynamically -->
+  </tbody>
+`;
+
+
+
+
+//////////////////////////v4
+Object.keys(groupedTutees).forEach(name => {
+  const tuteeSlots = groupedTutees[name];
+
+  // Check if the tutee has at least one approved slot
+  const approvedSlots = tuteeSlots.filter(tutee => tutee.status === 'Approved');
+  const pendingSlots = tuteeSlots.filter(tutee => tutee.status === 'Pending');
+  
+  if (approvedSlots.length > 0) {
+    // For tutees with approved slots, group all their approved slots together
+    let tuteeCard = `
+      <div class='col-md-4'>
+        <div class='tutee-card'>
+          <h5>${name}</h5>
+          <p><strong>Subject:</strong> ${approvedSlots[0].subject}</p>
+          <div>
+            <strong>Approved Slots:</strong>
+            ${approvedSlots.map(tutee => {
+              return `
+                <div class="slot">
+                  <h6>${tutee.day} ${formatTime(tutee.startTime)} - ${formatTime(tutee.endTime)}</h6>
+                  <button class="toggle-btn" onclick="toggleSlotDetails(${tutee.bookingId})">View Details</button>
+                  <div id="slot-details-${tutee.bookingId}" class="slot-details">
+                    <p><strong>Start Date:</strong> ${formatDate(tutee.startDate)}</p>
+                    <p><strong>End Date:</strong> ${formatDate(tutee.endDate)}</p>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+    approvedContainer.innerHTML += tuteeCard;
+  }
+// Display Pending slots correctly
+if (pendingSlots.length > 0) {
+  pendingSlots.forEach(tutee => {
+    pendingContainer.innerHTML += `
+      <div class='col-md-4'>
+        <div class='card p-3'>
+          <h5>${name}</h5>
+          <p><strong>Subject:</strong> ${tutee.subject}</p>
+          <p><strong>Day:</strong> ${tutee.day}</p>
+          <p><strong>Time Slot:</strong> ${formatTime(tutee.startTime)} - ${formatTime(tutee.endTime)}</p>
+          <p><strong>Duration:</strong> ${formatDate(tutee.startDate)} to ${formatDate(tutee.endDate)}</p>
+          <div class="btn-container">
+            <button onclick="approve('${tutee.bookingId}')" class="btn btn-primary rounded-button">Approve</button>
+            <button onclick="cancel('${tutee.bookingId}')" class="btn btn-danger rounded-button">Cancel</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+//   // Display Pending slots as before
+//   if (pendingSlots.length > 0) {
+//     pendingContainer.innerHTML += `
+//       <div class='col-md-4'>
+//         <div class='card p-3'>
+//           <h5>${name}</h5>
+//           <p>${pendingSlots[0].subject}</p>
+//            <p>${pendingSlots[0].day} <br> ${formatTime(pendingSlots[0].startTime)} - ${formatTime(pendingSlots[0].endTime)} </p>   
+
+//           </p>${formatDate(pendingSlots[0].startDate)} to ${formatDate(pendingSlots[0].endDate)}</p>
+// <div class="btn-container">
+//   <button onclick="approve('${pendingSlots[0].bookingId}')" class="btn btn-primary rounded-button">Approve</button>
+//   <button onclick="cancel('${pendingSlots[0].bookingId}')" class="btn btn-danger rounded-button">Cancel</button>
+// </div>
+//         </div>
+//       </div>
+//     `;
+//   }
+
+  // Display Completed and Cancelled slots as a table with detailed info
+  tuteeSlots.forEach(tutee => {
+    if (tutee.status === 'Completed' || tutee.status === 'Cancelled') {
+      const table = tutee.status === 'Completed' ? completedTable : cancelledTable;
+      table.innerHTML += `
+        <tr>
+          <td>${name}</td>
+          <td>${tutee.subject}</td>  
+          <td>${tutee.day}</td>        
+          <td>${formatTime(tutee.startTime)} - ${formatTime(tutee.endTime)}</td>
+          <td>${formatDate(tutee.startDate)}</td>
+          <td>${formatDate(tutee.endDate)}</td>
+        </tr>
+      `;
+    }
+  });
+});
+
+
+
+    }
+
+    // Toggle details for each slot
+    function toggleSlotDetails(bookingId) {
+      const slotDetails = document.getElementById(`slot-details-${bookingId}`);
+      const isVisible = slotDetails.style.display === 'block';
+      slotDetails.style.display = isVisible ? 'none' : 'block';
+    }
+
+    async function approve(id) { 
+      try {
+        await fetch(`/tutor/approveBooking/${id}`, { method: 'PATCH' });
+        location.reload();
+      } catch (error) {
+        console.error('Error approving booking:', error);
+      }
+    }
+
+    async function cancel(id) { 
+      try {
+        await fetch(`/tutor/cancelBooking/${id}`, { method: 'PATCH' });
+        location.reload();
+      } catch (error) {
+        console.error('Error canceling booking:', error);
+      }
+    }
+
+    fetchTutees().then(displayTutees).catch((error) => {
+      console.error('Error fetching or displaying tutees:', error);
+    });
+
+    window.addEventListener('DOMContentLoaded', function () {
+      fetch('../tutorNavbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+    });
+  </script>
+</body>
+</html>

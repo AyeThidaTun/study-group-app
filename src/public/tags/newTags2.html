@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resource Hub</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    .hero-section {
+      background-color: #f9f9f9;
+      padding: 40px;
+      border-radius: 8px;
+      margin-bottom: 40px;
+    }
+    .hero-buttons .btn {
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    .anchor-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .anchor-link {
+      display: inline-block;
+      padding: 10px 20px;
+      border: 1px solid #007bff;
+      border-radius: 20px;
+      text-decoration: none;
+      color: #007bff;
+      transition: all 0.2s ease-in-out;
+    }
+    .anchor-link:hover {
+      background-color: #007bff;
+      color: #fff;
+    }
+    .resource-card {
+      background-color: #f8f9fa;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: transform 0.2s;
+    }
+    .resource-card:hover {
+      transform: translateY(-5px);
+    }
+    .resource-icon {
+      font-size: 2rem;
+      color: #0d6efd;
+    }
+    .resource-details {
+      flex: 1;
+    }
+    .resource-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #212529;
+      margin-bottom: 10px;
+    }
+    .resource-description {
+      font-size: 1rem;
+      color: #6c757d;
+    }
+    .resource-action-btn {
+      background-color: #0d6efd;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.3rem;
+      text-align: center;
+      transition: background-color 0.2s;
+    }
+    .resource-action-btn:hover {
+      background-color: #0b5ed7;
+    }
+  </style>
+</head>
+<body>
+
+  
+  <div class="container">
+    <!-- Hero Section -->
+    <div class="hero-section d-flex flex-wrap align-items-center">
+      <div class="col-md-6">
+        <h1 class="display-4">Welcome to Your Resource Hub</h1>
+        <p class="lead">Easily create, manage, and explore resources tailored to your needs.</p>
+        <div class="hero-buttons">
+          <button class="btn btn-primary" id="createResourceBtn" data-bs-toggle="modal" data-bs-target="#createResourceModal">Create Resource</button>
+          <button class="btn btn-secondary" id="manageResourcesBtn">Manage Your Resources</button>
+        </div>
+      </div>
+      <div class="col-md-6 text-center">
+        <img src="https://via.placeholder.com/500x300" alt="Resource Management" class="img-fluid">
+      </div>
+    </div>
+
+        <!-- Popular Resources Section (Carousel) -->
+
+        <h2>Popular Resources</h2>
+
+        <div id="popularResourcesCarousel" class="carousel slide" data-bs-ride="carousel">
+    
+          <div class="carousel-inner" id="popular-resources">
+    
+            <!-- Popular resources will be dynamically added here -->
+    
+          </div>
+    
+          <button class="carousel-control-prev" type="button" data-bs-target="#popularResourcesCarousel" data-bs-slide="prev">
+    
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    
+            <span class="visually-hidden">Previous</span>
+    
+          </button>
+    
+          <button class="carousel-control-next" type="button" data-bs-target="#popularResourcesCarousel" data-bs-slide="next">
+    
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    
+            <span class="visually-hidden">Next</span>
+    
+          </button>
+    
+        </div>
+    
+    
+
+    <!-- Anchor Links Section -->
+    <h2>Explore Topics</h2>
+    <div id="anchor-links" class="anchor-links">
+      <!-- Tags will be dynamically added here -->
+    </div>
+
+    <!-- Resources Section -->
+    <div class="mt-5">
+      <h2>Resources</h2>
+      <div id="resources" class="row g-5">
+        <p class="text-muted">Select a tag to view its resources.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Resource Modal -->
+  <div class="modal fade" id="createResourceModal" tabindex="-1" aria-labelledby="createResourceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createResourceModalLabel">Create New Resource</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="createResourceForm">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title:</label>
+              <input type="text" id="title" name="title" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Description:</label>
+              <textarea id="description" name="description" class="form-control"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Resource</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const baseUrl = 'http://localhost:3000'; // Replace with your server's base URL
+    const token = localStorage.getItem('token');
+
+
+        // Fetch and display popular resources (most bookmarked)
+
+        async function fetchPopularResources() {
+
+try {
+
+  const response = await fetch(`${baseUrl}/resources/most-bookmarked?startDate=${new Date().toISOString()}`);
+
+  const resources = await response.json();
+
+  displayPopularResources(resources);
+
+} catch (error) {
+
+  console.error('Error fetching popular resources:', error);
+
+}
+
+}
+
+
+
+// Display popular resources in a carousel
+
+function displayPopularResources(resources) {
+
+const carouselInner = document.getElementById('popular-resources');
+
+carouselInner.innerHTML = ''; // Clear previous content
+
+if (resources.length === 0) {
+
+  carouselInner.innerHTML = '<div class="carousel-item active"><p>No popular resources available.</p></div>';
+
+  return;
+
+}
+
+
+
+resources.forEach((resource, index) => {
+
+  const isActive = index === 0 ? 'active' : '';
+
+  const carouselItem = document.createElement('div');
+
+  carouselItem.classList.add('carousel-item', isActive);
+
+  carouselItem.innerHTML = `
+
+    <div class="resource-card">
+
+      <div class="resource-icon"><i class="bi bi-book-half"></i></div>
+
+      <div class="resource-details">
+
+        <h5 class="resource-title">${resource.title}</h5>
+
+        <p class="resource-description">${resource.description || 'No description available.'}</p>
+
+      </div>
+
+      <button class="resource-action-btn bookmark-btn">
+
+        <i class="bi bi-bookmark-check-fill"></i> Bookmarked
+
+      </button>
+
+    </div>
+
+  `;
+
+  carouselInner.appendChild(carouselItem);
+
+});
+
+}
+
+
+
+// Initial data fetch
+
+fetchPopularResources();
+
+
+    // Fetch and display tags
+    async function fetchTags() {
+      try {
+        const response = await fetch(`${baseUrl}/tags`);
+        const tags = await response.json();
+        displayAnchorLinks(tags);
+      } catch (error) {
+        console.error('Error fetching tags:', error);
+      }
+    }
+
+    // Display anchor links
+    function displayAnchorLinks(tags) {
+      const container = document.getElementById('anchor-links');
+      container.innerHTML = '<a href="#" class="anchor-link" onclick="fetchResourcesByTag(null)">All Resources</a>';
+      tags.forEach(tag => {
+        const link = document.createElement('a');
+        link.href = `#${tag.id}`;
+        link.className = 'anchor-link';
+        link.textContent = tag.name;
+        link.onclick = (e) => {
+          e.preventDefault();
+          fetchResourcesByTag(tag.id);
+        };
+        container.appendChild(link);
+      });
+    }
+
+    // Fetch resources by tag
+    async function fetchResourcesByTag(tagId) {
+      try {
+        const url = tagId ? `${baseUrl}/tags/${tagId}/resources` : `${baseUrl}/resources`;
+        const response = await fetch(url);
+        const resources = await response.json();
+
+        // Fetch user's bookmarked resources
+        const bookmarksResponse = await fetch(`${baseUrl}/bookmarks`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const bookmarks = await bookmarksResponse.json();
+        const bookmarkedIds = new Set(bookmarks.map(bookmark => bookmark.resourceId));
+
+        displayResources(resources, bookmarkedIds);
+      } catch (error) {
+        console.error('Error fetching resources:', error);
+      }
+    }
+
+        // "Manage Your Resources" button functionality
+
+document.getElementById('manageResourcesBtn').addEventListener('click', function () {
+
+window.location.href = 'manageResources.html';
+
+});
+
+
+
+    // Display resources
+    function displayResources(resources, bookmarkedIds) {
+      const container = document.getElementById('resources');
+      container.innerHTML = '';
+      if (resources.length === 0) {
+        container.innerHTML = '<p class="text-warning">No resources found.</p>';
+        return;
+      }
+      resources.forEach(resource => {
+        const isBookmarked = bookmarkedIds.has(resource.id);
+        const card = document.createElement('div');
+        card.className = 'col-6';
+        card.innerHTML = `
+          <div class="resource-card">
+            <div class="resource-icon"><i class="bi bi-book-half"></i></div>
+            <div class="resource-details">
+              <h5 class="resource-title">${resource.title}</h5>
+              <p class="resource-description">${resource.description || 'No description available.'}</p>
+            </div>
+            <button 
+              class="resource-action-btn bookmark-btn" 
+              onclick="toggleBookmark('${resource.id}', this)"
+              data-bookmarked="${isBookmarked}">
+              <i class="${isBookmarked ? 'bi bi-bookmark-check-fill' : 'bi bi-bookmark'}"></i>
+            </button>
+          </div>`;
+        container.appendChild(card);
+      });
+    }
+
+    // Toggle bookmark status
+    async function toggleBookmark(resourceId, button) {
+      const isBookmarked = button.getAttribute('data-bookmarked') === 'true';
+      const method = isBookmarked ? 'DELETE' : 'POST';
+
+      try {
+        const response = await fetch(`${baseUrl}/bookmarks`, {
+          method,
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ resourceId }),
+        });
+        if (response.ok) {
+          button.setAttribute('data-bookmarked', !isBookmarked);
+          const icon = button.querySelector('i');
+          icon.className = !isBookmarked ? 'bi bi-bookmark-check-fill' : 'bi bi-bookmark';
+          alert(isBookmarked ? 'Removed from bookmarks!' : 'Added to bookmarks!');
+        } else {
+          alert('Failed to update bookmark status.');
+        }
+      } catch (error) {
+        console.error('Error updating bookmark:', error);
+      }
+    }
+
+    
+    // Create a new resource
+
+    document.getElementById('createResourceForm').addEventListener('submit', function (e) {
+
+e.preventDefault();
+
+const title = document.getElementById('title').value;
+
+const description = document.getElementById('description').value;
+
+fetch(`${baseUrl}/resources`, {
+
+  method: 'POST',
+
+  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+
+  body: JSON.stringify({ title, description }),
+
+})
+
+  .then(response => {
+
+    if (response.ok) {
+
+      alert('Resource created!');
+
+      fetchResourcesByTag(null);
+
+      document.getElementById('createResourceForm').reset();
+
+      bootstrap.Modal.getInstance(document.getElementById('createResourceModal')).hide();
+
+    } else alert('Failed to create.');
+
+  })
+
+  .catch(console.error);
+
+});
+
+
+
+// Initial data fetch
+    fetchTags();
+  </script>
+</body>
+</html>

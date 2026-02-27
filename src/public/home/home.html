@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link href="styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <!-- Navbar will be injected here -->
+    <div id="navbar-container"></div>
+
+    <!-- User Count -->
+    <div class="container my-5 py-5">
+        <div class="container">
+            <div id="userCount" class="row justify-content-center"></div>
+        </div>
+    </div>
+
+    <!-- Top 5 Users by Points -->
+    <div class="container my-5 py-5">
+        <p class="text-center h1 title">Top 5 Users by Points</p>
+        <canvas id="topUsersChart" class="my-4"></canvas>
+    </div>
+
+    <!-- Quiz Completion Trends -->
+    <div class="container">
+        <p class="text-center h1 title">Quiz Completion Trends</p>
+
+        <!-- Filter Buttons -->
+        <div class="text-center my-3">
+            <button class="btn btn-outline-brown" onclick="updateQuizTrends('day')">Filter by Day</button>
+            <button class="btn btn-outline-brown mx-2" onclick="updateQuizTrends('week')">Filter by Week</button>
+            <button class="btn btn-outline-brown mx-2" onclick="updateQuizTrends('month')">Filter by Month</button>
+            <button class="btn btn-outline-brown mx-2" onclick="updateQuizTrends('year')">Filter by Year</button>
+        </div>
+
+        <canvas id="quizTrendsChart"></canvas>
+    </div>
+
+    <script>
+        fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+    </script>
+    <script src="../auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="home.js"></script>
+</body>
+
+</html>

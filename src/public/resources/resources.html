@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resource Hub</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      /* padding: 20px; */
+      font-family: Arial, sans-serif;
+    }
+    .hero-section {
+      background-color: #f9f9f9;
+      padding: 40px;
+      border-radius: 8px;
+      margin-bottom: 40px;
+    }
+    .hero-buttons .btn {
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    .anchor-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .anchor-link {
+      display: inline-block;
+      padding: 10px 20px;
+      border: 1px solid #deb183 !important;
+      border-radius: 20px;
+      text-decoration: none;
+      color: black;
+      transition: all 0.2s ease-in-out;
+    }
+    .anchor-link:hover {
+      background-color: #deb183 !important;
+      color: #fff;
+    }
+    .resource-card1 {
+      background-color: #f8f9fa;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: transform 0.2s;
+    }
+    .resource-card1:hover {
+      transform: translateY(-5px);
+    }
+    .resource-icon {
+      font-size: 2rem;
+      color: #deb183 !important;
+    }
+    .resource-details {
+      flex: 1;
+    }
+    .resource-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #212529;
+      margin-bottom: 10px;
+    }
+    .resource-description {
+      font-size: 1rem;
+      color: #6c757d;
+    }
+    .resource-action-btn {
+      background-color: #deb183 !important;
+      color: #000000;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.3rem;
+      text-align: center;
+      transition: background-color 0.2s;
+    }
+    .resource-action-btn:hover {
+      background-color: #deb183 !important;
+    }
+    #createResourceBtn{
+      background-color: #deb183;
+    }
+    #hero-img{
+      width: 500px;
+      height: 350px;
+    }
+    .carousel-item-container {
+  width: 800px; /* Fixed width for the container */
+  display: flex;
+  justify-content: space-between; /* Distribute the items evenly within the container */
+  align-items: center; /* Center items vertically */
+  padding: 10px;
+  margin: 0 auto; /* Center the container horizontally */
+}
+
+    /* Resource card styles with border */
+    .resource-card {
+    background-color: #fff; /* White background for card */
+    border: 2px solid #deb183; /* Border with theme color */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    padding: 20px;
+    width: 30%; /* Adjust the width to fit 3 items per row */
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .resource-card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Darker shadow on hover */
+    transform: translateY(-5px); /* Slightly lift the card */
+  }
+
+  .carousel-control-prev-icon, 
+.carousel-control-next-icon {
+
+  color: #deb183; /* Arrow color */
+  font-size: 2rem; /* Arrow size */
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+
+  transition: all 0.3s ease; /* Smooth transitions */
+
+  position: relative; /* For proper placement of arrows */
+}
+
+/* Custom Previous Arrow */
+.carousel-control-prev-icon::after {
+  content: '<'; /* Left arrow symbol */
+  font-size: 1.5rem;
+  color: black; /* Match arrow color with parent */
+}
+
+/* Custom Next Arrow */
+.carousel-control-next-icon::after {
+  content: '>'; /* Right arrow symbol */
+  font-size: 1.5rem;
+  color: black; /* Match arrow color with parent */
+}
+
+
+
+
+  </style>
+</head>
+<body>
+
+      <!-- Navbar will be injected here -->
+      <div id="navbar-container"></div> 
+
+  <div class="container">
+    <!-- Hero Section -->
+    <div class="hero-section d-flex flex-wrap align-items-center">
+      <div class="col-md-6">
+        <h1 class="display-4">Welcome to Your Resource Hub</h1>
+        <p class="lead">Easily create, manage, and explore resources tailored to your needs.</p>
+        <div class="hero-buttons">
+          <!-- <button class="btn " id="createResourceBtn" data-bs-toggle="modal" data-bs-target="#createResourceModal">Create Resource</button> -->
+          <!-- Button to open the modal -->
+<button id="createResourceBtn" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createResourceModal">
+  Create Resource
+</button>
+          <button class="btn btn-secondary" id="manageResourcesBtn">Manage Your Resources</button>
+        </div>
+      </div>
+      <div class="col-md-6 text-center">
+        <img src="../images/capi-studying.png"  id="hero-img"alt="Resource Management" class="img-fluid">
+      </div>
+    </div>
+
+    <div class="mt-5">
+      <h2>Popular Resources in this Week</h2>
+      <div id="popular-resources-carousel" class="carousel slide" data-bs-ride="false">
+        <div class="carousel-inner" id="popular-resources-container">
+          <!-- Carousel items will be dynamically injected here -->
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#popular-resources-carousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#popular-resources-carousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Anchor Links Section -->
+    <h2>Explore Topics</h2>
+    <div id="anchor-links" class="anchor-links">
+      <!-- Tags will be dynamically added here -->
+    </div>
+
+    <!-- Resources Section -->
+    <div class="mt-5">
+      <h2>Resources</h2>
+      <div id="resources" class="row g-5">
+        <p class="text-muted">Select a tag to view its resources.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Resource Modal -->
+  <div class="modal fade" id="createResourceModal" tabindex="-1" aria-labelledby="createResourceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createResourceModalLabel">Create New Resource</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="createResourceForm">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title:</label>
+              <input type="text" id="title" name="title" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Description:</label>
+              <textarea id="description" name="description" class="form-control"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Resource</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+   
+    const token = localStorage.getItem('token');
+
+    // Fetch and display tags
+    async function fetchTags() {
+      try {
+        const response = await fetch(`/tags`);
+        const tags = await response.json();
+        displayAnchorLinks(tags);
+      } catch (error) {
+        console.error('Error fetching tags:', error);
+      }
+    }
+
+    // Display anchor links
+function displayAnchorLinks(tags) {
+  const container = document.getElementById('anchor-links');
+  
+  // "All Resources" link with preventDefault
+  const allResourcesLink = document.createElement('a');
+  allResourcesLink.href = "#";
+  allResourcesLink.className = 'anchor-link';
+  allResourcesLink.textContent = "All Resources";
+  
+  allResourcesLink.onclick = (e) => {
+    e.preventDefault(); // Prevent the default action (e.g., page redirect)
+    fetchResourcesByTag(null); // Fetch all resources when "All Resources" is clicked
+  };
+
+  container.appendChild(allResourcesLink);  // Add the "All Resources" link to the container
+  
+  // Create and display links for other tags
+  tags.forEach(tag => {
+    const link = document.createElement('a');
+    link.href = `#${tag.id}`;
+    link.className = 'anchor-link';
+    link.textContent = tag.name;
+    
+    link.onclick = (e) => {
+      e.preventDefault();  // Prevent the default action for tag links
+      fetchResourcesByTag(tag.id); // Fetch resources based on the clicked tag
+    };
+
+    container.appendChild(link); // Add tag links to the container
+  });
+}
+
+
+    // // Display anchor links
+    // function displayAnchorLinks(tags) {
+    //   const container = document.getElementById('anchor-links');
+    //   container.innerHTML = '<a href="#" class="anchor-link" onclick="fetchResourcesByTag(null)">All Resources</a>';
+    //   tags.forEach(tag => {
+    //     const link = document.createElement('a');
+    //     link.href = `#${tag.id}`;
+    //     link.className = 'anchor-link';
+    //     link.textContent = tag.name;
+    //     link.onclick = (e) => {
+    //       e.preventDefault();
+    //       fetchResourcesByTag(tag.id);
+    //     };
+    //     container.appendChild(link);
+    //   });
+    // }
+// Fetch most-bookmarked resources
+async function fetchPopularResources() {
+  try {
+    // Fetch resources from the most-bookmarked endpoint
+    const response = await fetch(`/resources/most-bookmarked`);
+    const resources = await response.json();
+    displayPopularResources(resources);
+  } catch (error) {
+    console.error('Error fetching popular resources:', error);
+  }
+}
+ // Function to display popular resources in a carousel with 3 items per slide
+ function displayPopularResources(resources) {
+    const container = document.getElementById('popular-resources-container');
+    container.innerHTML = ''; // Clear any existing items
+
+    if (resources.length === 0) {
+      container.innerHTML = '<p class="text-muted">No popular resources available.</p>';
+      return;
+    }
+
+    let currentItemIndex = 0;
+
+    // Create carousel items with 3 resources per item
+    while (currentItemIndex < resources.length) {
+      const item = document.createElement('div');
+      item.className = `carousel-item ${currentItemIndex === 0 ? 'active' : ''}`;
+      const itemContainer = document.createElement('div');
+      itemContainer.className = 'carousel-item-container';
+
+      // Create 3 resource cards
+      for (let i = 0; i < 3; i++) {
+        const resource = resources[currentItemIndex++];
+        if (!resource) break;
+
+        const card = document.createElement('div');
+        card.className = 'resource-card';
+        card.innerHTML = `
+          <h5 class="resource-title">${resource.title}</h5>
+          <p class="resource-description">${resource.description || 'No description available.'}</p>
+          <p class="text-muted">Bookmarks: ${resource.bookmarkCount}</p>
+          
+        `;
+        itemContainer.appendChild(card);
+      }
+
+      item.appendChild(itemContainer);
+      container.appendChild(item);
+    }
+  }
+
+  // Example usage: Fetch resources and display them in the carousel
+  async function fetchPopularResources() {
+    try {
+      const response = await fetch(`/resources/most-bookmarked`);
+      const resources = await response.json();
+      displayPopularResources(resources);
+      console.log("popular resources", resources);
+    } catch (error) {
+      console.error('Error fetching popular resources:', error);
+    }
+  }
+
+  // Call fetchPopularResources on page load
+  fetchPopularResources();
+    // Fetch resources by tag
+    async function fetchResourcesByTag(tagId) {
+      try {
+        const url = tagId ? `/tags/${tagId}/resources` : `/resources`;
+        const response = await fetch(url);
+        const resources = await response.json();
+
+        // Fetch user's bookmarked resources
+        const bookmarksResponse = await fetch(`/bookmarks`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const bookmarks = await bookmarksResponse.json();
+        const bookmarkedIds = new Set(bookmarks.map(bookmark => bookmark.resourceId));
+
+        displayResources(resources, bookmarkedIds);
+      } catch (error) {
+        console.error('Error fetching resources:', error);
+      }
+    }
+
+        // "Manage Your Resources" button functionality
+
+document.getElementById('manageResourcesBtn').addEventListener('click', function () {
+
+window.location.href = 'resources/manageResources.html';
+
+});
+
+
+
+    // Display resources
+    function displayResources(resources, bookmarkedIds) {
+      const container = document.getElementById('resources');
+      container.innerHTML = '';
+      if (resources.length === 0) {
+        container.innerHTML = '<p class="text-warning">No resources found.</p>';
+        return;
+      }
+      resources.forEach(resource => {
+        const isBookmarked = bookmarkedIds.has(resource.id);
+        const card = document.createElement('div');
+        card.className = 'col-6';
+        card.innerHTML = `
+          <div class="resource-card1">
+            <div class="resource-icon"><i class="bi bi-book-half"></i></div>
+            <div class="resource-details">
+              <h5 class="resource-title">${resource.title}</h5>
+              <p class="resource-description">${resource.description || 'No description available.'}</p>
+            </div>
+            <button 
+              class="resource-action-btn bookmark-btn" 
+              onclick="toggleBookmark('${resource.id}', this)"
+              data-bookmarked="${isBookmarked}">
+              <i class="${isBookmarked ? 'bi bi-bookmark-check-fill' : 'bi bi-bookmark'}"></i>
+            </button>
+          </div>`;
+        container.appendChild(card);
+      });
+    }
+
+    // Toggle bookmark status
+    async function toggleBookmark(resourceId, button) {
+      const isBookmarked = button.getAttribute('data-bookmarked') === 'true';
+      const method = isBookmarked ? 'DELETE' : 'POST';
+
+      try {
+        const response = await fetch(`/bookmarks`, {
+          method,
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ resourceId }),
+        });
+        if (response.ok) {
+          button.setAttribute('data-bookmarked', !isBookmarked);
+          const icon = button.querySelector('i');
+          icon.className = !isBookmarked ? 'bi bi-bookmark-check-fill' : 'bi bi-bookmark';
+          alert(isBookmarked ? 'Removed from bookmarks!' : 'Added to bookmarks!');
+        } else {
+          alert('Failed to update bookmark status.');
+        }
+      } catch (error) {
+        console.error('Error updating bookmark:', error);
+      }
+    }
+
+    
+    // Create a new resource
+
+    document.getElementById('createResourceForm').addEventListener('submit', function (e) {
+
+e.preventDefault();
+
+const title = document.getElementById('title').value;
+
+const description = document.getElementById('description').value;
+
+fetch(`/resources`, {
+
+  method: 'POST',
+
+  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+
+  body: JSON.stringify({ title, description }),
+
+})
+
+  .then(response => {
+
+    if (response.ok) {
+
+      alert('Resource created!');
+
+      fetchResourcesByTag(null);
+
+      document.getElementById('createResourceForm').reset();
+
+      bootstrap.Modal.getInstance(document.getElementById('createResourceModal')).hide();
+
+    } else alert('Failed to create.');
+
+  })
+
+  .catch(console.error);
+
+});
+
+  // Function to load the navbar
+     window.addEventListener('DOMContentLoaded', function () {
+      // Load the navbar
+      fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+
+     // Initial data fetch
+    fetchTags();
+    });
+
+
+
+  </script>
+</body>
+</html>

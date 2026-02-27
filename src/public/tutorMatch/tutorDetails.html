@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutor Details</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .slot.booked {
+  background-color: #ffcccc !important; /* Light red for booked slots */
+  border: 1px solid #ff0000; /* Red border */
+  cursor: not-allowed;
+}
+
+
+    .content-section {
+      display: flex;
+      gap: 20px;
+    }
+
+    .availability-container {
+      flex: 2;
+      border-right: 1px solid #ddd;
+      padding-right: 20px;
+    }
+
+    .booking-panel {
+      flex: 1;
+      padding: 10px 20px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    .days-row, .slots-row {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+
+    .days-row div, .slots-row div {
+      flex: 1;
+      text-align: center;
+    }
+
+    .slot {
+      background-color: #e7f3ff;
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #007bff;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .slot:hover {
+      background-color: #cce5ff;
+    }
+
+    .slot.active {
+      background-color: #007bff;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar will be injected here -->
+  <div id="navbar-container"></div>
+      
+  <div class="container mt-5">
+    <!-- Tutor Profile Section -->
+    <div id="profile" class="mb-4">
+      <!-- Tutor details will be populated here -->
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="content-section">
+      <!-- Availability Section -->
+      <div class="availability-container">
+        <div id="availability">
+          <!-- Days of the week and slots will be populated here -->
+        </div>
+      </div>
+
+      <!-- Booking Panel -->
+      <div id="booking-panel" class="booking-panel">
+        <h4>Booking Details</h4>
+        <div id="slot-details">
+          <!-- Slot details will be dynamically populated here -->
+          <p>Select a time slot to view details.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token'); // User's JWT token
+    const tuteeId = localStorage.getItem('userId'); // Tutee's userId
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const tutorId = new URLSearchParams(window.location.search).get('tutorId');
+      if (!tutorId) {
+        alert('Tutor ID is required!');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/tutor/${tutorId}/details`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch tutor details');
+
+        const tutor = await response.json();
+        showTutorProfile(tutor);
+        showAvailability(tutor.availabilitySlots);
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to load tutor details.');
+      }
+    });
+
+    function showTutorProfile(tutor) {
+      const profileContainer = document.getElementById('profile');
+      profileContainer.innerHTML = `
+        <h2>${tutor.name}</h2>
+        <p><strong>Academic Level:</strong> ${tutor.academicLevel}</p>
+        <p><strong>Skills:</strong> ${tutor.skills}</p>
+        <p><strong>Rating:</strong> ${tutor.rating} ⭐</p>
+        <p><strong>Experience:</strong> ${tutor.experience} years</p>
+      `;
+    }
+
+    const formatTime = (startTime, endTime) => {
+  const formatHour = (timeString) => {
+    const [hours, minutes] = timeString.split(':').map(Number);
+    const period = hours >= 12 ? 'pm' : 'am';
+    const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+    const formattedMinutes = minutes === 0 ? '' : `:${minutes}`;
+    return `${formattedHours}${formattedMinutes}${period}`;
+  };
+
+  return `${formatHour(startTime)}-${formatHour(endTime)}`;
+};
+
+function showAvailability(availabilitySlots) {
+  const availabilityContainer = document.getElementById('availability');
+
+  const slotsByDay = availabilitySlots.reduce((acc, slot) => {
+    acc[slot.dayOfWeek] = acc[slot.dayOfWeek] || [];
+    acc[slot.dayOfWeek].push(slot);
+    return acc;
+  }, {});
+
+  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  const daysRow = `
+    <div class="days-row">
+      ${daysOfWeek.map(day => `<div>${day}</div>`).join('')}
+    </div>
+  `;
+
+  const slotsRow = `
+    <div class="slots-row">
+      ${daysOfWeek.map(day => `
+        <div>
+          ${(slotsByDay[day] || []).map(slot => `
+            <div class="slot ${slot.isBooked ? 'booked' : ''}" 
+                onclick="selectSlot(${slot.id}, '${day}', '${slot.startTime}', '${slot.endTime}', ${slot.isBooked})">
+              ${formatTime(slot.startTime, slot.endTime)}
+            </div>
+          `).join('')}
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  availabilityContainer.innerHTML = daysRow + slotsRow;
+}
+
+
+
+    window.selectSlot = (slotId, day, startTime, endTime, isBooked) => {
+  const slotDetailsContainer = document.getElementById('slot-details');
+  const formattedTime = formatTime(startTime, endTime);
+
+  if (isBooked) {
+    slotDetailsContainer.innerHTML = `
+      <p><strong>Day:</strong> ${day}</p>
+      <p><strong>Time:</strong> ${formattedTime}</p>
+      <p style="color: red; font-weight: bold;">Sorry, this slot is already full.</p>
+    `;
+  } else {
+    slotDetailsContainer.innerHTML = `
+      <p><strong>Day:</strong> ${day}</p>
+      <p><strong>Time:</strong> ${formattedTime}</p>
+      <label for="duration-${slotId}" class="form-label">Duration (months):</label>
+      <select class="form-select" id="duration-${slotId}">
+        <option value="1" selected>1 Month</option>
+        <option value="2">2 Months</option>
+        <option value="3">3 Months</option>
+        <option value="6">6 Months</option>
+        <option value="12">12 Months</option>
+      </select>
+      <button class="btn btn-success w-100 mt-3" onclick="hireTutor(${slotId})">
+        Book Slot
+      </button>
+    `;
+  }
+};
+
+
+    async function hireTutor(slotId) {
+      const durationSelector = document.getElementById(`duration-${slotId}`);
+      const durationMonths = parseInt(durationSelector.value, 10);
+      const tutorId = new URLSearchParams(window.location.search).get('tutorId');
+
+      if (!durationMonths) {
+        alert("Please select a valid duration.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`/tutor/${tutorId}/hire`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ tuteeId, slotId, durationMonths }),
+        });
+
+        if (response.ok) {
+          alert('Slot booked successfully!');
+        } else {
+          const errorData = await response.json();
+          alert(`Error booking slot: ${errorData.error || 'Unknown error'}`);
+        }
+      } catch (error) {
+        console.error('Error booking slot:', error);
+        alert("Failed to book slot. Please try again.");
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+      fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+    });
+  </script>
+</body>
+</html>

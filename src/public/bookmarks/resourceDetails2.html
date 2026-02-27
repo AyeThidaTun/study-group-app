@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resource Details</title>
+  <style>
+    /* Basic Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Body Styling */
+     body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f6f9;
+      color: #333;
+      line-height: 1.6;
+      /* display: flex; */
+      justify-content: center;
+      align-items: center;
+      /* min-height: 100vh; */
+    } 
+
+    /* Resource Container */
+    .resource-container {
+      width: 90%;
+      max-width: 800px;
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      margin-left: 280px;
+      margin-top: 20px;
+    }
+
+    /* Image Section */
+    .placeholder-image {
+      width: 120px;
+      height: 180px;
+      background-color: #e2ccb6;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 14px;
+      font-weight: bold;
+      color: #deb183;
+    }
+
+    /* Content Section */
+    .resource-content {
+      flex: 1;
+    }
+
+    /* Header Styling */
+    .resource-header h1 {
+      font-size: 1.8em;
+      color: #212529;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .resource-author p {
+      margin: 8px 0;
+      font-size: 0.95em;
+      color: #555;
+    }
+
+    .resource-author span {
+      font-weight: bold;
+      color: #c99724;
+    }
+
+    /* Horizontal Line */
+    hr {
+      border: 0;
+      height: 1px;
+      background: #e0e0e0;
+      margin: 20px 0;
+    }
+
+    /* Description Section */
+    .resource-description h2 {
+      font-size: 1.2em;
+      margin-bottom: 8px;
+      color: #212529;
+    }
+
+    .resource-description p {
+      font-size: 1em;
+      color: #444;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Tags Section */
+    .resource-tags h2 {
+      font-size: 1.2em;
+      margin-bottom: 8px;
+      color: #212529;
+    }
+
+    .resource-tags ul {
+      list-style: none;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .resource-tags ul li {
+      background-color: #eaf4fe;
+      color: #c99724;
+      padding: 8px 12px;
+      border-radius: 16px;
+      font-size: 0.9em;
+      font-weight: bold;
+    }
+
+    /* Footer Section */
+    .resource-footer {
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    #start-reading-button {
+      padding: 12px 24px;
+      font-size: 1em;
+      background-color: #deb183;
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    #start-reading-button:hover {
+      background-color: #fab167;
+      transform: scale(1.05);
+    }
+
+    #remove-bookmark-button {
+      padding: 12px 24px;
+      font-size: 1em;
+      background-color: #2596be;
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      margin-left: 12px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    #remove-bookmark-button:hover {
+      background-color: #4acfff;
+      transform: scale(1.05);
+    }
+
+    #remove-bookmark-button {
+      padding: 12px 24px;
+      font-size: 1em;
+      background-color: #e63946;
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      margin-left: 12px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    #remove-bookmark-button:hover {
+      background-color: #b3242d;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+     <!-- Navbar will be injected here -->
+     <div id="navbar-container"></div> 
+
+  <div class="resource-container">
+    <!-- Placeholder Image -->
+    <div class="placeholder-image">
+      <img src="../images/book-image.png"  alt="Resource Img" class="img-fluid">
+    </div>
+
+    <!-- Content Section -->
+    <div class="resource-content">
+      <header class="resource-header">
+        <h1 id="resource-title">Loading...</h1>
+        <div class="resource-author">
+          <p><strong>Author: </strong><span id="resource-author">Loading...</span></p>
+          <p><strong>Creator's Email: </strong><span id="resource-creator-email">Loading...</span></p>
+          <p><strong>Creator's Points: </strong><span id="resource-creator-points">Loading...</span></p>
+        </div>
+      </header>
+
+      <!-- Horizontal Line -->
+      <hr>
+
+      <!-- Description Section -->
+      <div class="resource-description">
+        <h2>Description</h2>
+        <p id="resource-description">Loading...</p>
+      </div>
+
+      <!-- Tags Section -->
+      <div class="resource-tags">
+        <h2>Tags</h2>
+        <ul id="resource-tags">
+          <!-- Tags will go here -->
+        </ul>
+      </div>
+
+      <!-- Footer Section -->
+      <div class="resource-footer">
+        <button id="start-reading-button">Read</button>
+
+        <button id="remove-bookmark-button">Remove</button>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const resourceId = urlParams.get('id');
+    const bookmarkId = urlParams.get('bookmarkId'); // Assume you already have this info
+
+    async function fetchResourceDetails() {
+      try {
+        const response = await fetch(`/resources/Res/${resourceId}`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch resource details.');
+
+        const resource = await response.json();
+
+        document.getElementById('resource-title').textContent = resource.title || 'Unknown Title';
+        document.getElementById('resource-author').textContent = 
+          resource.User ? resource.User.name || resource.User.email : 'Unknown Author';
+        document.getElementById('resource-description').textContent =
+          resource.description || 'No description available.';
+        document.getElementById('resource-creator-email').textContent = 
+          resource.User ? resource.User.email || 'No email available' : 'No email available';
+        document.getElementById('resource-creator-points').textContent = 
+          resource.User ? `Points: ${resource.User.points || 0}` : 'Points: 0';
+
+        const tagsList = document.getElementById('resource-tags');
+        tagsList.innerHTML = '';
+        if (resource.resourceTag && resource.resourceTag.length > 0) {
+          resource.resourceTag.forEach(tag => {
+            const tagItem = document.createElement('li');
+            tagItem.textContent = tag.tag.name || 'No tags';
+            tagsList.appendChild(tagItem);
+          });
+        }
+
+        document.getElementById('start-reading-button').addEventListener('click', async () => {
+          try {
+            const response = await fetch(`/bookmarks/${bookmarkId}/book`, {
+              method: 'GET',
+              headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            });
+            if (!response.ok) throw new Error('Failed to fetch bookmark progress.');
+
+            const bookmark = await response.json();
+            const progress = bookmark.progress || 0;
+
+            const readingPageUrl = `bookmarks/progressBook2.html?id=${resourceId}&bookmarkId=${bookmarkId}&progress=${progress}`;
+
+            window.location.href = readingPageUrl;
+          } catch (error) {
+            console.error('Error fetching bookmark progress:', error);
+          }
+        });
+
+        document.getElementById('remove-bookmark-button').addEventListener('click', async () => {
+          try {
+            const confirmation = confirm("Are you sure you want to remove this bookmark?");
+            if (!confirmation) return;
+
+            const response = await fetch(`/bookmarks/${bookmarkId}`, {
+              method: 'DELETE',
+              headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            });
+
+            if (!response.ok) throw new Error('Failed to remove bookmark.');
+
+            alert('Bookmark removed successfully.');
+
+            window.location.href = 'bookmarks/statebook2.html';
+
+          } catch (error) {
+            console.error('Error removing bookmark:', error);
+            alert('Failed to remove bookmark. Please try again.');
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching resource details:', error);
+      }
+    }
+
+
+        // Function to load the navbar
+        window.addEventListener('DOMContentLoaded', function () {
+      // Load the navbar
+      fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+      
+    fetchResourceDetails();
+    });
+
+  </script>
+</body>
+</html>

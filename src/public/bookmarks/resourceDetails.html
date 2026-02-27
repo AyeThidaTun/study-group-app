@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resource Details</title>
+  <style>
+    /* Basic Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Body Styling */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f6f9;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    /* Resource Container */
+    .resource-container {
+      width: 80%;
+      max-width: 1200px;
+      margin: 50px auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Header Styling */
+    .resource-header {
+      margin-bottom: 20px;
+    }
+
+    .resource-header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .resource-author p {
+      margin-bottom: 5px;
+      font-size: 1.1em;
+    }
+
+    .resource-author span {
+      font-weight: 500;
+      color: #555;
+    }
+
+    /* Description Section */
+    .resource-description h2 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .resource-description p {
+      font-size: 1.1em;
+      color: #555;
+      margin-bottom: 30px;
+    }
+
+    /* Tags Section */
+    .resource-tags h2 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .resource-tags ul {
+      list-style: none;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .resource-tags ul li {
+      background-color: #0073e6;
+      color: #fff;
+      padding: 10px;
+      border-radius: 20px;
+      font-size: 1em;
+    }
+
+    /* Footer Section */
+    .resource-footer {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    #bookmark-button {
+      padding: 12px 30px;
+      font-size: 1.1em;
+      background-color: #0073e6;
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #bookmark-button:hover {
+      background-color: #005bb5;
+    }
+  </style>
+</head>
+<body>
+  <div class="resource-container">
+    <header class="resource-header">
+      <h1 id="resource-title">Loading...</h1>
+      <div class="resource-author">
+        <p><strong>Author: </strong><span id="resource-author">Loading...</span></p>
+        <p><strong>Creator's Email: </strong><span id="resource-creator-email">Loading...</span></p>
+        <p><strong>Creator's Points: </strong><span id="resource-creator-points">Loading...</span></p>
+      </div>
+    </header>
+
+    <div class="resource-description">
+      <h2>Description</h2>
+      <p id="resource-description">Loading...</p>
+    </div>
+
+    <div class="resource-tags">
+      <h2>Tags</h2>
+      <ul id="resource-tags">
+        <!-- Tags will go here -->
+      </ul>
+    </div>
+
+    <div class="resource-footer">
+      <button id="bookmark-button">Bookmark</button>
+    </div>
+  </div>
+
+  <script>
+    // Extract resource ID from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const resourceId = urlParams.get('id');
+
+    async function fetchResourceDetails() {
+      try {
+        const response = await fetch(`/resources/Res/${resourceId}`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch resource details.');
+
+        const resource = await response.json();
+
+        // Populate page with resource details
+        document.getElementById('resource-title').textContent = resource.title || 'Unknown Title';
+        document.getElementById('resource-author').textContent = 
+          resource.User ? resource.User.name || resource.User.email : 'Unknown Author';
+        document.getElementById('resource-description').textContent =
+          resource.description || 'No description available.';
+        
+        // Populate creator's details (email and points)
+        document.getElementById('resource-creator-email').textContent = 
+          resource.User ? resource.User.email || 'No email available' : 'No email available';
+        document.getElementById('resource-creator-points').textContent = 
+          resource.User ? `Points: ${resource.User.points || 0}` : 'Points: 0';
+
+        // Populate tags
+        const tagsList = document.getElementById('resource-tags');
+        tagsList.innerHTML = ''; // Clear existing tags
+        if (resource.resourceTag && resource.resourceTag.length > 0) {
+          resource.resourceTag.forEach(tag => {
+            const tagItem = document.createElement('li');
+            tagItem.textContent = tag.tag.name || 'No tags';
+            tagsList.appendChild(tagItem);
+          });
+        }
+
+        // Optionally, add functionality to the bookmark button
+        document.getElementById('bookmark-button').addEventListener('click', () => {
+          console.log(`Resource ${resource.id} bookmarked.`);
+          // Here you can add functionality for bookmarking (e.g., API call to bookmark the resource)
+        });
+
+      } catch (error) {
+        console.error('Error fetching resource details:', error);
+      }
+    }
+
+    // Initialize the page by fetching resource details
+    fetchResourceDetails();
+  </script>
+</body>
+</html>

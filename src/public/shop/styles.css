@@ -1,0 +1,27 @@
+#points-container {
+    position: fixed; /* Keep it visible at all times */
+    top: 20%; /* Move it towards the top */
+    left: 80%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    z-index: 2000;
+}
+
+
+.points-display {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.points-gif {
+    width: 50px;
+    height: auto;
+    margin-right: 10px;
+}
+
+.bg-brown {
+    background-color: #d4a373 !important; /* Your custom hex color */
+}

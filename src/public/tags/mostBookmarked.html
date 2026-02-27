@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Most Bookmarked Resources</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="container mt-4">
+    <h1 class="text-center">Most Bookmarked Resources</h1>
+
+    <!-- Section for displaying most bookmarked resources -->
+    <div id="mostBookmarkedContainer" class="row"></div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+
+    // Fetch most bookmarked resources and display them
+    function fetchMostBookmarkedResources() {
+      const startDate = prompt("Enter start date (YYYY-MM-DD) or leave blank for the last 7 days:");
+      const endDate = prompt("Enter end date (YYYY-MM-DD) or leave blank for today:");
+
+      const params = new URLSearchParams();
+      if (startDate) params.append("startDate", startDate);
+      if (endDate) params.append("endDate", endDate);
+
+      fetch(`http://localhost:3000/resources/most-bookmarked?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((response) => response.json())
+        .then((resources) => {
+          const container = document.getElementById("mostBookmarkedContainer");
+          container.innerHTML = ""; // Clear previous content
+
+          resources.forEach((resource) => {
+            const card = document.createElement("div");
+            card.className = "col-md-4 mb-4";
+            card.innerHTML = `
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">${resource.title}</h5>
+                  <p class="card-text">${resource.description || ""}</p>
+                  <p><strong>Bookmarked:</strong> ${resource.bookmarkCount} times</p>
+                  <p><strong>Created By:</strong> ${resource.User.name}</p>
+                </div>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        })
+        .catch(console.error);
+    }
+
+    // Trigger fetch when page loads
+    fetchMostBookmarkedResources();
+  </script>
+</body>
+</html>

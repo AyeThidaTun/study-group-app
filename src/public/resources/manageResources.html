@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Your Resources</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+ body {
+  /* padding: 20px; */
+  font-family: Arial, sans-serif;
+}
+
+
+
+.resource-card {
+  background-color: #fffce4;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column; /* Stack child elements vertically */
+  gap: 20px; /* Add space between the elements */
+}
+
+.resource-details {
+  flex: 1;
+}
+
+.resource-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #212529;
+  margin-bottom: 10px;
+}
+
+.resource-description {
+  font-size: 1rem;
+  color: #6c757d;
+}
+
+.d-flex { /* Ensure buttons are aligned horizontally */
+  display: flex;
+  gap: 10px; /* Space between buttons */
+}
+
+.action-btn {
+  margin-right: 10px;
+}
+
+.container {
+  margin-top: 15px;
+}
+
+#create-btn {
+  background-color: #e0b484;
+}
+
+#btn-del {
+background-color: #aa5353;
+color: white;
+}
+
+#btn-update{
+  background-color: #208454;
+  color: white;
+}
+
+#btn-add{
+  background-color: #2596be;
+  color: white;
+}
+  </style>
+</head>
+<body>
+    <!-- Navbar will be injected here -->
+    <div id="navbar-container"></div>
+
+  <div class="container">
+    <h2 class="mb-2">Manage Your Resources</h2>
+    <p>Manage the resources you created, you can sort by date as well.</p>
+
+   
+    <!-- <div class="mb-4">
+        <button class="btn btn-secondary" onclick="sortResources('asc')">Sort by Date (Ascending)</button>
+        <button class="btn btn-secondary" onclick="sortResources('desc')">Sort by Date (Descending)</button>
+      </div> -->
+      <div class="mb-4 d-flex justify-content-between align-items-center">
+         <!-- Button to create new resources -->
+    <button class="btn mb-4" id="create-btn" data-bs-toggle="modal" data-bs-target="#createResourceModal">Create New Resource</button>
+
+        
+        <div class="mb-4 d-flex align-items-center">
+          <h4 class="mr-4">Sort by Date:</h4> <!-- Margin to the right of the text -->
+          <i class="bi bi-arrow-up-square" onclick="sortResources('asc')" style="font-size: 2rem; cursor: pointer; "></i>
+          <i class="bi bi-arrow-down-square" onclick="sortResources('desc')" style="font-size: 2rem; cursor: pointer;"></i>
+        </div>
+      
+      </div>
+      
+      
+    <!-- Placeholder if no resources -->
+    <div id="no-resources-placeholder" class="text-center text-muted d-none">
+      <p>You haven't uploaded anything yet.</p>
+      <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#createResourceModal">Upload Resource</button>
+    </div>
+
+    <!-- List of resources -->
+    <div id="user-resources" class="row g-4">
+      <!-- User resources will be dynamically added here -->
+    </div>
+  </div>
+
+  <!-- Create Resource Modal -->
+  <div class="modal fade" id="createResourceModal" tabindex="-1" aria-labelledby="createResourceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createResourceModalLabel">Create New Resource</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="createResourceForm">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title:</label>
+              <input type="text" id="title" name="title" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Description:</label>
+              <textarea id="description" name="description" class="form-control"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Resource</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update Resource Modal -->
+  <div class="modal fade" id="updateResourceModal" tabindex="-1" aria-labelledby="updateResourceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="updateResourceModalLabel">Update Resource</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="updateResourceForm">
+            <input type="hidden" id="updateResourceId">
+            <div class="mb-3">
+              <label for="updateTitle" class="form-label">Title:</label>
+              <input type="text" id="updateTitle" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="updateDescription" class="form-label">Description:</label>
+              <textarea id="updateDescription" class="form-control"></textarea>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="updateResource()">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Add Tag Modal -->
+<div class="modal fade" id="addTagModal" tabindex="-1" aria-labelledby="addTagModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addTagModalLabel">Add Tags</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addTagForm">
+          <input type="hidden" id="addTagResourceId">
+          <div id="categoriesContainer" class="mb-3">
+            <!-- Categories with checkboxes will be dynamically inserted here -->
+          </div>
+          <button type="button" class="btn btn-primary" onclick="addBulkTagsToResource()">Add Selected Tags</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+
+    const token = localStorage.getItem('token');
+
+
+    let currentResources = []; // Store the fetched resources
+let currentSortOrder = 'asc'; // Default sort order
+
+async function fetchUserResources() {
+  try {
+    const userId = localStorage.getItem('userId'); // Adjust as needed to get the logged-in user's ID
+    if (!userId) {
+      throw new Error("User ID not found in localStorage.");
+    }
+
+    const response = await fetch(`/resources/User/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch resources: ${response.statusText}`);
+    }
+
+    currentResources = await response.json();
+    // Sort the resources based on currentSortOrder before displaying
+    sortResources(currentSortOrder);
+  } catch (error) {
+    console.error('Error fetching user resources:', error);
+  }
+}
+
+// Sorting function
+function sortResources(order) {
+  currentSortOrder = order;
+
+  const sortedResources = [...currentResources].sort((a, b) => {
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
+    
+    if (order === 'asc') {
+      return dateA - dateB; // Ascending order
+    } else {
+      return dateB - dateA; // Descending order
+    }
+  });
+
+  displayUserResources(sortedResources);
+}
+
+
+
+
+     // Fetch and display categories as checkboxes
+  async function fetchAndDisplayCategories() {
+    const categoriesContainer = document.getElementById('categoriesContainer');
+    categoriesContainer.innerHTML = '<p>Loading categories...</p>';
+
+    try {
+      const response = await fetch(`/tags`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const categories = await response.json();
+
+      if (categories.length > 0) {
+        categoriesContainer.innerHTML = categories
+          .map(
+            (category) => `
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="${category.id}" id="category-${category.id}">
+              <label class="form-check-label" for="category-${category.id}">
+                ${category.name}
+              </label>
+            </div>`
+          )
+          .join('');
+      } else {
+        categoriesContainer.innerHTML = '<p>No categories available.</p>';
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      categoriesContainer.innerHTML = '<p>Error loading categories.</p>';
+    }
+  }
+
+  // Prepare Add Tag Modal with resource ID and load categories
+  function prepareAddTag(resourceId) {
+    document.getElementById('addTagResourceId').value = resourceId;
+    fetchAndDisplayCategories();
+  }
+
+
+
+async function addBulkTagsToResource() {
+  const resourceId = document.getElementById('addTagResourceId').value;
+  const selectedTags = Array.from(document.querySelectorAll('#categoriesContainer input:checked')).map(
+    (checkbox) => checkbox.value
+  );
+
+  if (selectedTags.length === 0) {
+    alert('Please select at least one tag.');
+    return;
+  }
+
+  try {
+    const response = await fetch(`/resourceTags`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        resourceId,
+        // tagIds: selectedTags, // Use `selectedTags` here
+        tagIds: selectedTags.map(Number), // Use `selectedTags` here
+      }),
+     
+    });
+
+    if (response.ok) {
+      alert("Tags added successfully!");
+      bootstrap.Modal.getInstance(document.getElementById('addTagModal')).hide();
+      fetchUserResources();
+    } else {
+      alert("Duplicate tags are not allowed");
+    }
+  } catch (error) {
+    console.error("Error adding tags:", error);
+  }
+}
+
+
+
+
+
+
+
+    // Display user's resources
+function displayUserResources(resources) {
+  const container = document.getElementById('user-resources');
+  const placeholder = document.getElementById('no-resources-placeholder');
+
+  if (resources.length === 0) {
+    placeholder.classList.remove('d-none');
+    container.classList.add('d-none');
+    return;
+  }
+
+  placeholder.classList.add('d-none');
+  container.classList.remove('d-none');
+  container.innerHTML = '';
+
+  resources.forEach(resource => {
+    // Format the createdAt date
+    const createdAt = new Date(resource.createdAt);
+    const formattedDate = createdAt.toLocaleDateString("en-US", {
+      weekday: "long", year: "numeric", month: "long", day: "numeric"
+    });
+
+    // Extract tags from resource
+    const tags = resource.resourceTag.map(rt => rt.tag.name).join(', ');
+
+    const card = document.createElement('div');
+    card.className = 'col-6';
+    card.innerHTML = `
+      <div class="resource-card">
+        <div class="resource-details">
+          <h5 class="resource-title">${resource.title}</h5>
+          <p class="resource-description">${resource.description || 'No description available.'}</p>
+          <p><strong>Created At:</strong> ${formattedDate}</p>
+          <p><strong>Tags:</strong> ${tags || 'No tags available.'}</p>
+        </div>
+        <div class="d-flex">
+          <button class="btn action-btn" id="btn-del" onclick="deleteResource('${resource.id}')">Delete</button>
+          <button class="btn action-btn" id="btn-update" data-bs-toggle="modal" data-bs-target="#updateResourceModal" onclick="populateUpdateForm('${resource.id}', '${resource.title}', '${resource.description}')">Update</button>
+          <button class="btn action-btn" id="btn-add" data-bs-toggle="modal" data-bs-target="#addTagModal" onclick="prepareAddTag('${resource.id}')">Add Tag</button>
+        </div>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+
+
+
+    // Populate update form
+    function populateUpdateForm(id, title, description) {
+      document.getElementById('updateResourceId').value = id;
+      document.getElementById('updateTitle').value = title;
+      document.getElementById('updateDescription').value = description;
+    }
+
+    // Delete resource
+    async function deleteResource(resourceId) {
+      if (confirm('Are you sure you want to delete this resource?')) {
+        try {
+          const response = await fetch(`/resources/${resourceId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (response.ok) {
+            alert('Resource deleted successfully!');
+            fetchUserResources();
+          } else {
+            alert('Failed to delete resource.');
+          }
+        } catch (error) {
+          console.error('Error deleting resource:', error);
+        }
+      }
+    }
+
+
+    // Update resource
+    async function updateResource() {
+      const id = document.getElementById('updateResourceId').value;
+      const title = document.getElementById('updateTitle').value;
+      const description = document.getElementById('updateDescription').value;
+
+      try {
+        const response = await fetch(`/resources/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ title, description }),
+        });
+
+        if (response.ok) {
+          alert('Resource updated successfully!');
+          document.getElementById('updateResourceForm').reset();
+          bootstrap.Modal.getInstance(document.getElementById('updateResourceModal')).hide();
+          fetchUserResources();
+        } else {
+          alert('Failed to update resource.');
+        }
+      } catch (error) {
+        console.error('Error updating resource:', error);
+      }
+    }
+
+    // Initialize
+    document.getElementById('createResourceForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+
+      try {
+        const response = await fetch(`/resources`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ title, description }),
+        });
+
+        if (response.ok) {
+          alert('Resource created successfully!');
+          document.getElementById('createResourceForm').reset();
+          bootstrap.Modal.getInstance(document.getElementById('createResourceModal')).hide();
+          fetchUserResources();
+        } else {
+          alert('Failed to create resource.');
+        }
+      } catch (error) {
+        console.error('Error creating resource:', error);
+      }
+    });
+
+     // Function to load the navbar
+     window.addEventListener('DOMContentLoaded', function () {
+      // Load the navbar
+      fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+
+      // Fetch bookmarks when the page loads
+      fetchUserResources();
+    });
+
+    // fetchUserResources();
+  </script>
+</body>
+</html>

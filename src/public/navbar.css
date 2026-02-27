@@ -1,0 +1,39 @@
+body.dark-mode {
+    background-color: #333; /*  is generally avoided, but can be a quick fix */
+    color: #fff;
+}
+
+.navbar.dark-mode {
+    background-color: #222;
+}
+  
+  body.dark-mode .list-group-item {
+    background-color: #343a40;
+    color: #f8f9fa;
+    border-color: #454d55;
+  }
+  
+  body.dark-mode .form-control {
+    background-color: #343a40;
+    color: #f8f9fa;
+    border-color: #454d55;
+  }
+  
+  body.dark-mode .form-control:focus {
+    background-color: #343a40;
+    color: #f8f9fa;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+  
+  body.dark-mode .btn-outline-success {
+    color: #f8f9fa;
+    border-color: #f8f9fa;
+  }
+  
+  body.dark-mode .btn-outline-success:hover {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+  }
+  

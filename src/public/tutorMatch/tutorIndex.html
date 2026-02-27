@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hire a Tutor</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sour+Gummy:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<style>p {
+  font-size: 20px;
+}
+</style>
+</head>
+<body>
+  <!-- Navbar -->
+  <div id="navbar-container"></div>
+
+  <!-- Hero Section -->
+  <div class="container mt-4" style="background-color: #fdf4d7;">
+    <div class=" align-items-center  p-4 rounded ">
+      <!-- Left Side: Text Content -->
+      <div class="col-md-12" style="padding-left: 100px;">
+        <h1 class="display-4">Hi, <span id="username" style=" font-family: 'Sour Gummy', serif; color: #cd9b62;">User</span>!</h1> 
+
+        <h4 style="font-family: 'Sour Gummy', serif; font-size: 30px;"> Having a good mentor is like a companion for life, just like me and mr.crocodile.</h4>
+      </div>
+
+
+
+      <!-- Right Side: Image -->
+      <div class="col-md-12 text-center" >
+        <div class="" style="width: 300px; height: 300px; margin: 0 auto;">
+          <img src="../images/capy-and-crocodile.png" alt="Hero Image" class="img-fluid rounded" style="object-fit: cover; width: 100%; height: 100%;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommended Tutors Section -->
+  <div class="container mt-4">
+    <h3 class="text-center">Recommended just for you</h3>
+    <div id="recommendedTutors" class="row">
+      <!-- Tutor cards will be dynamically injected here -->
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Fetch and display user details in the Hero Section
+    async function fetchUserDetails() {
+      const userId = localStorage.getItem('userId'); // Get userId from localStorage
+
+      if (!userId) {
+        console.error('User ID not found');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/tutor/user/${userId}`); // Update the API URL as needed
+        if (!response.ok) throw new Error('Failed to fetch user details');
+
+        const userData = await response.json();
+
+        // Dynamically update the Hero Section
+        document.getElementById('username').textContent = userData.name || 'User';
+        document.getElementById('userBio').textContent = userData.bio || 'Welcome to our platform!';
+        document.getElementById('userAcademicLevel').textContent = userData.academicLevel || 'N/A';
+        document.getElementById('userSkills').textContent = userData.skills || 'N/A';
+        document.getElementById('userSubjectInterests').textContent = userData.subjectInterests || 'N/A';
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    }
+
+    // Fetch and display recommended tutors
+    async function fetchRecommendedTutors() {
+
+      const token = localStorage.getItem('token'); // User's JWT token stored in localStorage
+      const tuteeId = localStorage.getItem('userId'); // Tutee's userId from localStorage
+
+      if (!tuteeId) {
+        alert("Tutee ID is not found in localStorage.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`/tutor/recommendations/${tuteeId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch recommendations');
+
+        const tutors = await response.json();
+        renderTutors(tutors);
+      } catch (error) {
+        console.error('Error:', error);
+        alert("Failed to load recommended tutors. Please try again.");
+      }
+    }
+
+    // Render tutor cards dynamically
+    function renderTutors(tutors) {
+      const tutorsContainer = document.getElementById('recommendedTutors');
+      tutorsContainer.innerHTML = ''; // Clear existing content
+
+      tutors.forEach((tutor) => {
+        // Extract values safely from the tutor object
+        const name = tutor.name || 'Unknown Tutor';
+        const academicLevel = tutor.academicLevel || 'Academic Level';
+        const skills = tutor.skills || 'Skills not available';
+        const avatarImage = `${tutor.avatarImage}`; // Adjust this to match actual avatar file naming
+        const rating = tutor.rating || 0;
+        const experience = tutor.experience || 0;
+        const price = tutor.price || 50; // Default price
+
+        // Build the HTML for each tutor card
+        const tutorCard = `
+          <div class="col-md-6 mb-4">
+            <div class="card  p-3 h-100 position-relative" style=" border: 5px solid #c8cda6;" >
+              <div class="row g-0 align-items-center">
+                <!-- Left: Image -->
+                <div class="col-auto">
+                  <img src="../images/${avatarImage}" 
+                    class="rounded-circle" 
+                    style="width: 120px; height: 120px; object-fit: cover;" 
+                    alt="${name}">
+                </div>
+
+                <!-- Right: Content -->
+                <div class="col ps-3">
+                  <h5 class="card-title mb-2  " style=" font-size: 30px; font-family: 'Sour Gummy', serif;">${name}</h5>
+                  <p class="text-muted mb-2">${academicLevel}</p>
+                  <p class="card-text mb-3">${skills}</p>
+                  <p class="card-text mb-3">
+                    <strong>Rating:</strong> ${rating} ⭐ | <strong>Experience:</strong> ${experience} years
+                  </p>
+                 
+                  <button class="btn btn-outline-secondary w-70" style=" text-align: center;"
+                    data-tutor-id="${tutor.tutorId}" 
+                    onclick="viewDetails(${tutor.tutorId})">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Append the card to the container
+        tutorsContainer.innerHTML += tutorCard;
+      });
+    }
+
+    // Fetch user and tutor data on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchUserDetails();
+      fetchRecommendedTutors();
+    });
+
+    // Function to navigate to the tutor details page
+    function viewDetails(tutorId) {
+      // Redirect to the tutor details page
+      window.location.href = `/tutorMatch/tutorDetails.html?tutorId=${tutorId}`;
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+      fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resource Reading</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+    }
+
+    .content-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 10px;
+      background: #f0f0f0;
+      z-index: 1000;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #0073e6;
+      transition: width 0.2s;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: 2rem;
+      color: #333;
+    }
+
+    p {
+      line-height: 1.8;
+      margin-bottom: 20px;
+      color: #555;
+    }
+    
+   /* Fixed Arrow Style */
+
+    .go-back-arrow {
+
+    position: fixed;
+
+    top: 15px;
+
+    left: 15px;
+
+    font-size: 24px;
+
+    color: #0073e6;
+
+    background: none;
+
+    border: none;
+
+    cursor: pointer;
+
+    z-index: 1001;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 40px;
+
+    height: 40px;
+
+    border-radius: 50%;
+
+    transition: background 0.3s ease;
+
+    }
+
+    .go-back-arrow:hover {
+
+    background: rgba(0, 115, 230, 0.1);
+
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <!-- Go Back Arrow -->
+
+<button class="go-back-arrow" id="go-back-arrow">&lt;</button>
+
+  <div class="content-container">
+    <h1 id="resource-title">Loading...</h1>
+    <div id="resource-content">
+      <!-- Content will be dynamically loaded here -->
+    </div>
+  
+  </div>
+
+  <script>
+    const resourceId = new URLSearchParams(window.location.search).get('id');
+    const bookmarkId = new URLSearchParams(window.location.search).get('bookmarkId'); // Bookmark ID passed via query
+
+    // Hardcoded content as fallback
+    const hardcodedContent = `
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum 
+        vehicula ex eu viverra hendrerit. Suspendisse potenti. Curabitur ut 
+        sagittis risus. Vivamus a volutpat justo. Duis ultricies tincidunt 
+        felis, eu vehicula urna pharetra ut. Nam vehicula, libero sed 
+        elementum vehicula, est magna laoreet arcu, sed sodales ligula enim 
+        eu nisl.
+      </p>
+      <p>
+        Integer vitae eros in nulla placerat tristique. Proin tristique 
+        auctor dui, ut fringilla felis. Integer lacinia malesuada ligula, 
+        vel tincidunt elit efficitur vel. Nam euismod, urna ut vehicula 
+        varius, turpis ex pharetra urna, in congue elit tortor vel eros.
+      </p>
+      <p>
+        Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
+        accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
+        quae ab illo inventore veritatis et quasi architecto beatae vitae 
+        dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit 
+        aspernatur aut odit aut fugit, sed quia consequuntur magni dolores 
+        eos qui ratione voluptatem sequi nesciunt.
+      </p>
+        <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum 
+        vehicula ex eu viverra hendrerit. Suspendisse potenti. Curabitur ut 
+        sagittis risus. Vivamus a volutpat justo. Duis ultricies tincidunt 
+        felis, eu vehicula urna pharetra ut. Nam vehicula, libero sed 
+        elementum vehicula, est magna laoreet arcu, sed sodales ligula enim 
+        eu nisl.
+      </p>
+      <p>
+        Integer vitae eros in nulla placerat tristique. Proin tristique 
+        auctor dui, ut fringilla felis. Integer lacinia malesuada ligula, 
+        vel tincidunt elit efficitur vel. Nam euismod, urna ut vehicula 
+        varius, turpis ex pharetra urna, in congue elit tortor vel eros.
+      </p>
+      <p>
+        Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
+        accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
+        quae ab illo inventore veritatis et quasi architecto beatae vitae 
+        dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit 
+        aspernatur aut odit aut fugit, sed quia consequuntur magni dolores 
+        eos qui ratione voluptatem sequi nesciunt.
+      </p>
+        <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum 
+        vehicula ex eu viverra hendrerit. Suspendisse potenti. Curabitur ut 
+        sagittis risus. Vivamus a volutpat justo. Duis ultricies tincidunt 
+        felis, eu vehicula urna pharetra ut. Nam vehicula, libero sed 
+        elementum vehicula, est magna laoreet arcu, sed sodales ligula enim 
+        eu nisl.
+      </p>
+      <p>
+        Integer vitae eros in nulla placerat tristique. Proin tristique 
+        auctor dui, ut fringilla felis. Integer lacinia malesuada ligula, 
+        vel tincidunt elit efficitur vel. Nam euismod, urna ut vehicula 
+        varius, turpis ex pharetra urna, in congue elit tortor vel eros.
+      </p>
+      <p>
+        Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
+        accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
+        quae ab illo inventore veritatis et quasi architecto beatae vitae 
+        dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit 
+        aspernatur aut odit aut fugit, sed quia consequuntur magni dolores 
+        eos qui ratione voluptatem sequi nesciunt.
+      </p>
+        <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum 
+        vehicula ex eu viverra hendrerit. Suspendisse potenti. Curabitur ut 
+        sagittis risus. Vivamus a volutpat justo. Duis ultricies tincidunt 
+        felis, eu vehicula urna pharetra ut. Nam vehicula, libero sed 
+        elementum vehicula, est magna laoreet arcu, sed sodales ligula enim 
+        eu nisl.
+      </p>
+      <p>
+        Integer vitae eros in nulla placerat tristique. Proin tristique 
+        auctor dui, ut fringilla felis. Integer lacinia malesuada ligula, 
+        vel tincidunt elit efficitur vel. Nam euismod, urna ut vehicula 
+        varius, turpis ex pharetra urna, in congue elit tortor vel eros.
+      </p>
+      <p>
+        Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
+        accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
+        quae ab illo inventore veritatis et quasi architecto beatae vitae 
+        dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit 
+        aspernatur aut odit aut fugit, sed quia consequuntur magni dolores 
+        eos qui ratione voluptatem sequi nesciunt.
+      </p>
+        <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum 
+        vehicula ex eu viverra hendrerit. Suspendisse potenti. Curabitur ut 
+        sagittis risus. Vivamus a volutpat justo. Duis ultricies tincidunt 
+        felis, eu vehicula urna pharetra ut. Nam vehicula, libero sed 
+        elementum vehicula, est magna laoreet arcu, sed sodales ligula enim 
+        eu nisl.
+      </p>
+      <p>
+        Integer vitae eros in nulla placerat tristique. Proin tristique 
+        auctor dui, ut fringilla felis. Integer lacinia malesuada ligula, 
+        vel tincidunt elit efficitur vel. Nam euismod, urna ut vehicula 
+        varius, turpis ex pharetra urna, in congue elit tortor vel eros.
+      </p>
+      <p>
+        Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
+        accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
+        quae ab illo inventore veritatis et quasi architecto beatae vitae 
+        dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit 
+        aspernatur aut odit aut fugit, sed quia consequuntur magni dolores 
+        eos qui ratione voluptatem sequi nesciunt.
+      </p>
+    `;
+
+
+  let statusUpdated = false; // To track if the status has already been updated
+
+  // Helper function to update bookmark status
+  // async function updateBookmarkStatus(id, status) {
+  //   try {
+  //     const response = await fetch(`/bookmarks/${id}/status`, {
+  //       method: 'PATCH',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `Bearer ${localStorage.getItem('token')}`,
+  //       },
+  //       body: JSON.stringify({ status }),
+  //     });
+
+  //     if (!response.ok) throw new Error('Failed to update bookmark status.');
+
+  //     console.log(`Bookmark status updated to: ${status}`);
+  //     await fetchBookmarks(); // Refresh bookmarks (if required in your app context)
+  //   } catch (error) {
+  //     console.error('Error updating bookmark status:', error);
+  //   }
+  // }
+
+  async function fetchResourceContent() {
+    try {
+      const response = await fetch(`/resources/Res/${resourceId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+
+      if (!response.ok) throw new Error('Failed to load resource content.');
+
+      const resource = await response.json();
+      document.getElementById('resource-title').textContent = resource.title || 'Untitled Resource';
+
+      // Use resource description if available, otherwise fallback to hardcoded content
+      document.getElementById('resource-content').innerHTML = hardcodedContent;
+    } catch (error) {
+      console.error(error);
+      document.getElementById('resource-content').innerHTML = hardcodedContent;
+    }
+  }
+
+      function calculateProgress() {
+
+    const content = document.querySelector('.content-container');
+
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+
+    const scrollHeight = content.scrollHeight - window.innerHeight;
+
+    const progress = Math.min((scrollTop / scrollHeight) * 100, 100);
+
+    return Math.round(progress);
+
+    }
+
+  async function updateProgress(progress) {
+    try {
+      const response = await fetch(`/bookmarks/${bookmarkId}/progress`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ progress }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update progress.');
+
+      console.log(`Progress updated: ${progress}%`);
+    } catch (error) {
+      console.error('Failed to update progress:', error);
+    }
+  }
+
+  // function calculateProgress() {
+  //   const content = document.querySelector('.content-container');
+  //   const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  //   const scrollHeight = content.scrollHeight - window.innerHeight;
+  //   const progress = Math.min((scrollTop / scrollHeight) * 100, 100);
+  //   return Math.round(progress);
+  // }
+
+  async function updateBookmarkStatus(id, status) {
+
+  try {
+
+  const response = await fetch(`/bookmarks/${id}/status`, {
+
+  method: 'PATCH',
+
+  headers: {
+
+  'Content-Type': 'application/json',
+
+  Authorization: `Bearer ${localStorage.getItem('token')}`,
+
+  },
+
+  body: JSON.stringify({ status }),
+
+  });
+
+  if (!response.ok) throw new Error('Failed to update bookmark status.');
+
+  console.log(`Bookmark status updated to: ${status}`);
+
+  } catch (error) {
+
+  console.error('Error updating bookmark status:', error);
+
+  }
+
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+
+  const params = new URLSearchParams(window.location.search);
+
+  const progress = parseFloat(params.get('progress')) || 0;
+
+  // If progress exists, scroll to the corresponding position
+
+  if (progress > 0) {
+
+  const content = document.querySelector('.content-container');
+
+  const targetScroll = (progress / 100) * (content.scrollHeight - window.innerHeight);
+
+  window.scrollTo(0, targetScroll);
+
+  }
+
+  });
+
+  window.addEventListener('scroll', () => {
+    const progress = calculateProgress();
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.width = `${progress}%`;
+
+    // Update progress on the server every 10% progress
+    if (progress % 10 === 0) {
+      updateProgress(progress);
+    }
+
+    // Update status to "reading" if progress is greater than 0% and status hasn't been updated yet
+    if (progress > 0 && !statusUpdated) {
+      updateBookmarkStatus(bookmarkId, 'READING');
+      statusUpdated = true; // Prevent further updates to the status
+    }
+  });
+
+     
+    // "Go Back" arrow functionality
+
+    const goBackArrow = document.getElementById('go-back-arrow');
+
+    goBackArrow.addEventListener('click', async () => {
+
+    const progressBar = document.getElementById('progress-bar');
+
+    const progress = parseInt(progressBar.style.width, 10); // Current progress as an integer
+
+    if (progress === 100) {
+
+    console.log('Marking as Finished since progress is 100%.');
+
+    await updateBookmarkStatus(bookmarkId, 'FINISHED');
+
+    } else {
+
+    console.log('Progress is less than 100%, no status update needed.');
+
+    }
+
+    // Navigate back to the book or previous page
+
+    window.history.back(); // Adjust navigation logic if needed
+
+    });
+
+    // Fetch the resource content
+  fetchResourceContent();
+  </script>
+</body>
+</html>

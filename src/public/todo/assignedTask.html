@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do App</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sour+Gummy:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+
+    <div class="container mt-5">
+      <h2>Tasks Assigned to You</h2>
+      <div class="row">
+        <!-- Pending Tasks -->
+        <div class="col-md-4">
+          <div class="card border-warning">
+            <div class="card-header bg-warning text-white">
+              <h5 class="mb-0">
+                <i class="bi bi-hourglass-split"></i> Pending Response
+              </h5>
+            </div>
+            <div class="card-body" id="pendingTasks"></div>
+          </div>
+        </div>
+
+        <!-- Accepted Tasks -->
+        <div class="col-md-4">
+          <div class="card border-success">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0">
+                <i class="bi bi-check-circle"></i> Accepted Tasks
+              </h5>
+            </div>
+            <div class="card-body" id="acceptedTasks"></div>
+          </div>
+        </div>
+
+        <!-- Rejected Tasks -->
+        <div class="col-md-4">
+          <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+              <h5 class="mb-0">
+                <i class="bi bi-x-circle"></i> Rejected Tasks
+              </h5>
+            </div>
+            <div class="card-body" id="rejectedTasks"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      fetch("../navbar.html")
+        .then((response) => response.text())
+        .then((html) => {
+          document.getElementById("navbar-container").innerHTML = html;
+
+          // Dark mode initialization code (moved from navbar.js)
+          const darkModeToggle = document.getElementById("dark-mode-toggle");
+          const navbar = document.querySelector(".navbar");
+
+          if (!darkModeToggle || !navbar) {
+            console.error("Dark mode toggle or navbar not found!");
+            return;
+          }
+
+          // Function to enable/disable dark mode
+          function toggleDarkMode(enable) {
+            if (enable) {
+              document.body.classList.add("dark-mode");
+              navbar.classList.add("dark-mode");
+            } else {
+              document.body.classList.remove("dark-mode");
+              navbar.classList.remove("dark-mode");
+            }
+          }
+
+          // Load saved dark mode state
+          const darkModeState = localStorage.getItem("darkMode");
+          if (darkModeState === "enabled") {
+            toggleDarkMode(true);
+          }
+
+          // Toggle dark mode on button click
+          darkModeToggle.addEventListener("click", () => {
+            const isDarkMode = document.body.classList.contains("dark-mode");
+            toggleDarkMode(!isDarkMode);
+            localStorage.setItem(
+              "darkMode",
+              isDarkMode ? "disabled" : "enabled"
+            );
+          });
+        });
+
+      const userId = parseInt(localStorage.getItem("userId"));
+      async function loadTasks() {
+        try {
+          const response = await fetch(`/assignments/assigned-to-me/${userId}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const tasks = await response.json();
+          renderTasks(tasks);
+        } catch (error) {
+          console.error("Error loading tasks:", error);
+          showError(`Failed to load tasks: ${error.message}`);
+        }
+      }
+
+      function renderTasks(tasks) {
+        const containers = {
+          PENDING: document.getElementById("pendingTasks"),
+          ACCEPTED: document.getElementById("acceptedTasks"),
+          REJECTED: document.getElementById("rejectedTasks"),
+        };
+
+        // Clear existing content
+        Object.values(containers).forEach((c) => (c.innerHTML = ""));
+
+        // Handle case where no tasks found
+        if (!tasks || tasks.length === 0) {
+          containers.PENDING.innerHTML =
+            '<p class="text-muted">No pending tasks</p>';
+          containers.ACCEPTED.innerHTML =
+            '<p class="text-muted">No accepted tasks</p>';
+          containers.REJECTED.innerHTML =
+            '<p class="text-muted">No rejected tasks</p>';
+          return;
+        }
+
+        // Render tasks
+        tasks.forEach((task) => {
+          const container = containers[task.status] || containers.PENDING;
+          const card = document.createElement("div");
+          card.className = "card mb-3 task-card";
+          card.innerHTML = `
+      <div class="card-body">
+        <h5 class="card-title">${task.title}</h5>
+        <div class="card-text">
+          ${
+            task.assigner
+              ? `<p class="text-muted small">From: ${task.assigner.name}</p>`
+              : ""
+          }
+          <p>Due: ${new Date(task.dueDate).toLocaleDateString()}</p>
+          ${task.description ? `<p>${task.description}</p>` : ""}
+        </div>
+        ${renderTaskActions(task)}
+      </div>
+    `;
+          container.appendChild(card);
+        });
+      }
+
+      function renderTaskActions(task) {
+        if (task.status === "PENDING") {
+          return `
+              <div class="d-grid gap-2">
+                <button class="btn btn-success" onclick="handleTaskAction(${task.id}, 'ACCEPTED')">
+                  <i class="bi bi-check-lg"></i> Accept
+                </button>
+                <button class="btn btn-danger" onclick="handleTaskAction(${task.id}, 'REJECTED')">
+                  <i class="bi bi-x-lg"></i> Reject
+                </button>
+              </div>
+            `;
+        }
+
+        return `
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="badge bg-${
+                task.status === "ACCEPTED" ? "success" : "danger"
+              }">
+                ${task.status}
+              </span>
+              ${
+                task.todoId
+                  ? `
+                <a href="/todo/index.html" class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-list-task"></i> View Task
+                </a>
+              `
+                  : ""
+              }
+            </div>
+          `;
+      }
+
+      async function handleTaskAction(taskId, action) {
+        try {
+          const response = await fetch(`/assignments/${taskId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: action }),
+          });
+
+          if (response.ok) {
+            showSuccess(`Task ${action.toLowerCase()} successfully!`);
+            loadTasks();
+          }
+        } catch (error) {
+          showError("Failed to update task status");
+        }
+      }
+
+      // Initialize
+      loadTasks();
+    </script>
+  </body>
+</html>

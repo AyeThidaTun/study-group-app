@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn-custom {
+            background-color: #deb183 !important;
+            color: black;
+            border: none;
+            border-radius: 5px;
+        }
+
+        img {
+            width: 50%;
+            height: 50%;
+            border-radius: 30px;
+        }
+
+        table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background-color: #deb183;
+            color: rgba(66, 60, 60, 0.663);
+            text-align: center;
+        }
+
+        tbody tr:hover {
+            background-color: #ffefd8;
+        }
+
+        th,
+        td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        th {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .status-confirmed {
+            color: rgb(6, 169, 6);
+            font-weight: bold;
+        }
+
+        .status-cancelled {
+            color: rgba(181, 25, 25, 0.718);
+            font-weight: bold;
+        }
+
+        select {
+            max-width: 200px;
+        }
+
+        .card {
+            border-radius: 10px;
+            background-color: #e2d9d1;
+        }
+
+        .card-title {
+            color: #b06a18;
+            font-weight: bold;
+        }
+
+        .card-text {
+            color: #4a4a4a;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #deb183 !important;
+            color: black !important;
+        }
+
+        .nav-tabs .nav-link {
+            color: #333 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-container" class="mb-3"></div>
+    <div class="container">
+        <div class="container text-center my-4">
+            <img src="../images/capy-feedback.jpeg" class="img-fluid rounded-circle shadow-sm mb-3" alt="Capybara Logo"
+                style="max-width: 120px;">
+            <h3>Feedback Section</h3>
+            <p>Let's improve together by giving feedbacks!</p>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <div class="d-flex align-items-center">
+                <p class="mb-0 me-2">Filter groups:</p>
+                <select id="studyGroupFilter" class="form-select me-2" style="width: auto;">
+                    <option value="all">All Groups</option>
+                </select>
+            </div>
+        </div>
+        
+        <ul class="nav nav-tabs custom-tabs" id="feedbackTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="disclosed-tab" data-bs-toggle="tab" data-bs-target="#disclosed"
+                    type="button" role="tab">Feedbacks for you</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button"
+                    role="tab">Pending Feedbacks</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="confirmed-tab" data-bs-toggle="tab" data-bs-target="#confirmed"
+                    type="button" role="tab">Feedback History</button>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-3" id="feedbackTabsContent">
+
+            <div class="tab-pane fade show active" id="disclosed" role="tabpanel">
+                <!-- Filters -->
+                <div class="row mb-5 align-items-end">
+                    <div class="col-md-2">
+                        <label for="startDate" class="form-label">Start Date</label>
+                        <input type="date" id="startDate" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="endDate" class="form-label">End Date</label>
+                        <input type="date" id="endDate" class="form-control">
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-custom w-100" id="applyButton" type="submit">Apply</button>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-custom w-100" id="resetButton" type="submit">Reset</button>
+                    </div>
+                </div>
+                <div class="container row mb-5" id="disclosedFeedbackList">
+                    <!-- Disclosed feedback cards will be inserted here -->
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="pending" role="tabpanel">
+                <div class="container row" id="pendingFeedbackList">
+                    <!-- Pending feedback cards will be inserted here -->
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="confirmed" role="tabpanel">
+                <div class="table-container mb-3" id="bookingsList">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Room</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Location</th>
+                                <th>Group</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingsTableBody">
+                            <!-- Booking rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="feedback.js"></script>
+    <script>
+        // Function to load the navbar into the page
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('../navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                // Dark mode initialization code (moved from navbar.js)
+                const darkModeToggle = document.getElementById('dark-mode-toggle');
+                const navbar = document.querySelector('.navbar');
+
+                if (!darkModeToggle || !navbar) {
+                    console.error('Dark mode toggle or navbar not found!');
+                    return;
+                }
+
+                // Function to enable/disable dark mode
+                function toggleDarkMode(enable) {
+                    if (enable) {
+                        document.body.classList.add('dark-mode');
+                        navbar.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        navbar.classList.remove('dark-mode');
+                    }
+                }
+
+                // Load saved dark mode state
+                const darkModeState = localStorage.getItem('darkMode');
+                if (darkModeState === 'enabled') {
+                    toggleDarkMode(true);
+                }
+
+                // Toggle dark mode on button click
+                darkModeToggle.addEventListener('click', () => {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleDarkMode(!isDarkMode);
+                    localStorage.setItem('darkMode', isDarkMode ? 'disabled' : 'enabled');
+                });
+
+
+            });
+
+        });
+    </script>
+</body>
+
+</html>

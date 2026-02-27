@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: #fefae0;
+        }
+
+        .welcome-message {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+            display: block;
+            min-height: 2rem;
+            /* Adjust this value as needed */
+        }
+
+        .login-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #FAEDCD;
+        }
+
+        .form-control {
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            width: 100%;
+        }
+
+        .btn-login {
+            background-color: #d4a373;
+            border-color: #d4a373;
+            color: #000;
+        }
+
+        .btn-login:hover {
+            background-color: #b6c498;
+            border-color: #b6c498;
+        }
+
+        .btn-register {
+            background-color: #E9EDC9;
+            border-color: #E9EDC9;
+            color: black;
+        }
+
+        .btn-register:hover {
+            background-color: #b6c498;
+            border-color: #b6c498;
+        }
+
+        .btn-custom {
+            max-width: 300px;
+            width: 100%;
+        }
+
+        /* Custom Modal Styling */
+        .modal-content.custom-popover {
+            border-color: var(--bs-popover-border-color, #6f42c1);
+            /* Example: Violet border */
+            background-color: var(--bs-popover-header-bg, #6f42c1);
+            /* Background color */
+            color: var(--bs-popover-header-color, #fff);
+            /* Text color */
+        }
+
+        .modal-header.custom-popover {
+            background-color: var(--bs-popover-header-bg, #6f42c1);
+            color: var(--bs-popover-header-color, #fff);
+        }
+
+        .modal-footer.custom-popover {
+            border-top: 1px solid var(--bs-popover-border-color, #6f42c1);
+        }
+
+        .modal-body.custom-popover {
+            padding: var(--bs-popover-body-padding-y, 0.5rem) var(--bs-popover-body-padding-x, 1rem);
+        }
+
+
+        #alertModal {
+            z-index: 1060 !important;
+            /* Higher than other modals and backdrops */
+        }
+
+        .modal-backdrop.alert-backdrop {
+            z-index: 1055 !important;
+            /* Place the backdrop just below the alert modal */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container my-5">
+        <!-- Welcome Message with Animation -->
+        <h2 class="welcome-message" id="welcomeMessage"></h2>
+
+        <div class="login-container">
+            <h3 class="text-center mb-4">Login</h3>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="text" id="email" name="email" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-login mb-3">Login</button>
+                <button type="button" class="btn btn-secondary btn-register"
+                    onclick="window.location.href='register.html'">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- General Alert Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered alertModal">
+            <div class="modal-content custom-popover">
+                <div class="modal-header custom-popover">
+                    <h5 class="modal-title" id="alertModalLabel">Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body custom-popover" id="alertModalBody">
+                    <!-- Alert content will be dynamically inserted here -->
+                </div>
+                <div class="modal-footer custom-popover">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Array of different "Welcome Back" messages
+        const welcomeMessages = [
+            "Getting back to Mugging?",
+            "Getting back on the Grind?",
+            "Getting back to pull up your GPA?",
+            "Ready to Ace your Exams?",
+            "Time to hit the books hard!",
+            "Ready to get back to studying?",
+            "It's Slaving Time!",
+            "Ready to become the Smartest?",
+            "Time to crush those goals!",
+            "Let's turn that grind into shine!",
+            "Ready to transform your dreams into reality?",
+            "Let's make studying your superpower!",
+            "It's time to unleash your inner genius!",
+            "Get ready to conquer those books!",
+            "Your future self will thank you for this!",
+            "Let's turn stress into success together!",
+            "Focus mode: ON!",
+            "Remember, every page turned is a step closer to success!",
+            "You've got this—let's get to work!",
+            "Every hour you study is an hour closer to your dreams!",
+            "Let's make procrastination a thing of the past!",
+            "The journey of a thousand pages begins with a single study session.",
+            "You're not just studying; you're building your future!"
+        ];
+
+        let currentMessageIndex = Math.floor(Math.random() * welcomeMessages.length); // Start with a random message
+        let currentCharIndex = 0;
+        const welcomeElement = document.getElementById('welcomeMessage');
+
+        function typeMessage() {
+            const currentMessage = welcomeMessages[currentMessageIndex];
+            if (currentCharIndex < currentMessage.length) {
+                welcomeElement.textContent += currentMessage.charAt(currentCharIndex);
+                currentCharIndex++;
+                setTimeout(typeMessage, 100); // Speed of typing
+            } else {
+                // After the full message is typed, delete it and move to the next one
+                setTimeout(deleteMessage, 1000); // Wait before starting to delete
+            }
+        }
+
+        function deleteMessage() {
+            const currentMessage = welcomeMessages[currentMessageIndex];
+            if (currentCharIndex > 0) {
+                welcomeElement.textContent = currentMessage.slice(0, currentCharIndex - 1);
+                currentCharIndex--;
+                setTimeout(deleteMessage, 10); // Speed of deleting
+            } else {
+                // Randomize the next message
+                currentMessageIndex = Math.floor(Math.random() * welcomeMessages.length);
+                setTimeout(typeMessage, 250); // Wait before typing next message
+            }
+        }
+
+        // Start the typing animation
+        typeMessage();
+
+        // Login form handling
+        document.getElementById("loginForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent form submission
+
+            // Get email and password values
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            // Send the request with the email and password as JSON data using fetch
+            fetch("/users/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email: email, password: password })
+            })
+                .then(function (response) {
+                    if (response.status === 200) {
+                        response.json().then(function (data) {
+                            console.log("Token:", data.token);
+
+                            // Store token, email, userId, and userRole in localStorage
+                            localStorage.setItem("token", data.token);
+                            localStorage.setItem("email", data.email);
+                            localStorage.setItem("userId", data.userId);
+                            localStorage.setItem("userRole", data.userRole);
+                            localStorage.setItem("isTutor", data.isTutor);
+
+                            // Update login details
+                            fetch("/users/updateLoginDetails", {
+                                method: "PUT",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": `Bearer ${data.token}`
+                                },
+                                body: JSON.stringify({ userId: data.userId, login_time: new Date().toISOString() })
+                            })
+                                .then(function (updateResponse) {
+                                    if (updateResponse.status !== 200) {
+                                        updateResponse.json().then(function (updateData) {
+                                            showAlertModal("Failed to update login details: " + updateData.message);
+                                        });
+                                    }
+                                })
+                                .catch(function (updateError) {
+                                    console.log("Error updating login details:", updateError);
+                                });
+
+                            console.log(data + "data  after loggin in");
+                            console.log(data.userRole + " user role after loggin in");
+
+                            // Redirect based on userRole
+                            if (data.userRole === "ADMIN") {
+                                window.location.href = "/admin/manageSuggestions.html";
+                            } else {
+                                window.location.href = "/profile/profile.html";
+                            }
+                        });
+                    } else {
+                        // Display an alert for failed login
+                        showAlertModal("Login failed. Please check your email and password.");
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Error:", error);
+                    showAlertModal("An error occurred. Please try again later.");
+                });
+        });
+
+        // Function to show the custom alert modal
+        function showAlertModal(message, title = "Notification") {
+            const alertModal = new bootstrap.Modal(document.getElementById('alertModal'), {
+                backdrop: true, // Ensure a backdrop is used
+            });
+            const alertModalTitle = document.getElementById('alertModalLabel');
+            const alertModalBody = document.getElementById('alertModalBody');
+
+            // Update modal title and message
+            alertModalTitle.textContent = title;
+            alertModalBody.textContent = message;
+
+            // Show the modal
+            alertModal.show();
+
+            // Handle custom backdrop logic specifically for alertModal
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.classList.add('alert-backdrop'); // Add custom class
+            }
+
+            // Clean up the custom backdrop and restore Bootstrap's default behavior
+            const alertModalElement = document.getElementById('alertModal');
+            const removeCustomBackdrop = () => {
+                const customBackdrop = document.querySelector('.modal-backdrop.alert-backdrop');
+                if (customBackdrop) {
+                    customBackdrop.classList.remove('alert-backdrop'); // Remove custom class
+                }
+                alertModalElement.removeEventListener('hidden.bs.modal', removeCustomBackdrop); // Cleanup listener
+            };
+
+            alertModalElement.addEventListener('hidden.bs.modal', removeCustomBackdrop);
+        }
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>
